@@ -488,6 +488,28 @@ dd {
   margin-top: 44px;
 }
 
+.drop-interest {
+  align-items: start;
+  background: linear-gradient(90deg, rgba(143, 63, 252, 0.2), rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 0.75fr) minmax(320px, 1fr);
+  margin-top: 44px;
+  padding: 28px;
+}
+
+.drop-interest h2 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.06;
+  margin: 0;
+}
+
+.drop-interest p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .contact-form {
   display: grid;
   gap: 12px;
@@ -622,6 +644,7 @@ dd {
   .proof-strip,
   .stats-strip,
   .countdown-band,
+  .drop-interest,
   .media-grid,
   .cta-grid,
   .signup-form,

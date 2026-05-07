@@ -1,4 +1,5 @@
 const DATA_KEY = "site-data";
+const PREVIOUS_DATA_KEY = "site-data:previous";
 const PASSWORD_KEY = "admin-password";
 const SUBMISSION_PREFIX = "submission:";
 const RATE_PREFIX = "rate:";
@@ -281,8 +282,32 @@ async function handleSave(request, env) {
     ...(data.meta || {}),
     lastSavedAt: new Date().toISOString()
   };
+  const current = await env.SITE_KV.get(DATA_KEY);
+  if (current) {
+    await env.SITE_KV.put(PREVIOUS_DATA_KEY, current);
+  }
   await env.SITE_KV.put(DATA_KEY, JSON.stringify(data));
   return json({ ok: true, lastSavedAt: data.meta.lastSavedAt });
+}
+
+async function handleRestorePrevious(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const previous = await env.SITE_KV.get(PREVIOUS_DATA_KEY, "json");
+  if (!previous) return json({ error: "No previous saved version found yet." }, { status: 404 });
+
+  previous.meta = {
+    ...(previous.meta || {}),
+    lastSavedAt: new Date().toISOString(),
+    restoredAt: new Date().toISOString()
+  };
+  const current = await env.SITE_KV.get(DATA_KEY);
+  if (current) {
+    await env.SITE_KV.put(PREVIOUS_DATA_KEY, current);
+  }
+  await env.SITE_KV.put(DATA_KEY, JSON.stringify(previous));
+  return json({ ok: true, data: previous, lastSavedAt: previous.meta.lastSavedAt });
 }
 
 async function handleLogout() {
@@ -311,6 +336,7 @@ export default {
     if (url.pathname === "/api/admin/login" && request.method === "POST") return handleLogin(request, env);
     if (url.pathname === "/api/admin/logout" && request.method === "POST") return handleLogout();
     if (url.pathname === "/api/admin/save" && request.method === "POST") return handleSave(request, env);
+    if (url.pathname === "/api/admin/restore-previous" && request.method === "POST") return handleRestorePrevious(request, env);
     if (url.pathname === "/api/admin/upload" && request.method === "POST") return handleUpload(request, env);
     if (url.pathname === "/api/admin/change-password" && request.method === "POST") return handleChangePassword(request, env);
     if (url.pathname === "/api/admin/submissions") return handleSubmissions(request, env);

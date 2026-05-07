@@ -422,6 +422,20 @@ $("[data-import]").addEventListener("change", async (event) => {
   }
 });
 
+$("[data-restore-previous]").addEventListener("click", async () => {
+  if (!confirm("Undo the last saved website changes and restore the previous saved version?")) return;
+  setMessage("[data-save-message]", "Restoring previous version...");
+  try {
+    const result = await api("/api/admin/restore-previous", { method: "POST", body: JSON.stringify({}) });
+    draft = result.data;
+    renderEditors();
+    setLastSaved(result.lastSavedAt);
+    setMessage("[data-save-message]", "Previous version restored and published.");
+  } catch (error) {
+    setMessage("[data-save-message]", error.message);
+  }
+});
+
 $("[data-refresh-submissions]").addEventListener("click", loadSubmissions);
 
 $("[data-change-password]").addEventListener("click", async () => {

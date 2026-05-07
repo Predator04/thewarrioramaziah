@@ -229,14 +229,22 @@ function renderSocials() {
 }
 
 function setupContactForm() {
-  const form = document.querySelector("[data-contact-form]");
-  if (!form) return;
+  const forms = document.querySelectorAll("[data-contact-form]");
+  if (!forms.length) return;
 
-  form.addEventListener("submit", async (event) => {
+  forms.forEach((form) => form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const message = document.querySelector("[data-contact-message]");
+    const message = form.querySelector("[data-contact-message]");
     message.textContent = "Sending...";
     const data = Object.fromEntries(new FormData(form).entries());
+    if (form.dataset.interestForm !== undefined) {
+      const size = data.size || "No size selected";
+      const color = data.color || "No color selected";
+      data.type = "Merch Interest";
+      data.message = `Merch interest. Size: ${size}. Color: ${color}. Note: ${data.message || "No extra note."}`;
+      delete data.size;
+      delete data.color;
+    }
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -250,7 +258,7 @@ function setupContactForm() {
     } catch (error) {
       message.textContent = error.message;
     }
-  });
+  }));
 }
 
 async function loadEditableSiteData() {
