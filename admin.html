@@ -42,33 +42,38 @@
         <section class="admin-grid">
           <article class="admin-card">
             <h2>Home + About</h2>
-            <label>Brand Name<input data-field="brandName"></label>
-            <label>Homepage Headline<textarea data-field="tagline"></textarea></label>
-            <label>Homepage Copy<textarea data-field="heroCopy"></textarea></label>
-            <label>Booking Email<input data-field="bookingEmail" type="email"></label>
-            <label>About Headline<textarea data-field="aboutTitle"></textarea></label>
-            <label>About Copy<textarea data-field="aboutCopy"></textarea></label>
+            <p class="admin-help">Main text visitors see across the homepage, about page, and contact buttons.</p>
+            <label data-help="This is the fighter/brand name shown in the header and footer.">Site Name<input data-field="brandName"></label>
+            <label data-help="This is the big first headline on the homepage.">Homepage Main Headline<textarea data-field="tagline"></textarea></label>
+            <label data-help="This short sentence appears under the homepage headline.">Homepage Intro Text<textarea data-field="heroCopy"></textarea></label>
+            <label data-help="Booking, media, and sponsor buttons send email here.">Booking Email<input data-field="bookingEmail" type="email"></label>
+            <label data-help="This headline appears on the About section/page.">About Section Headline<textarea data-field="aboutTitle"></textarea></label>
+            <label data-help="Use this for his story, hometown, training, faith, and why fans should follow him.">About Story Text<textarea data-field="aboutCopy"></textarea></label>
           </article>
 
           <article class="admin-card">
             <h2>Fighter Stats</h2>
+            <p class="admin-help">Quick facts that make him feel like a real boxer. Use TBA until details are confirmed.</p>
             <div data-stats-editor></div>
           </article>
 
           <article class="admin-card wide">
             <h2>Events</h2>
+            <p class="admin-help">Add fights, appearances, weigh-ins, pop-ups, signings, or gym events.</p>
             <div data-events-editor></div>
             <button class="button secondary" type="button" data-add-event>Add Event</button>
           </article>
 
           <article class="admin-card wide">
             <h2>Fight Kit / Products</h2>
+            <p class="admin-help">Use this for what he wears now. Later, fan merch can go here too.</p>
             <div data-products-editor></div>
             <button class="button secondary" type="button" data-add-product>Add Item</button>
           </article>
 
           <article class="admin-card wide">
             <h2>Media Gallery</h2>
+            <p class="admin-help">Photos or graphics shown in the media/gallery section of the site.</p>
             <div data-media-editor></div>
             <button class="button secondary" type="button" data-add-media>Add Media Item</button>
           </article>

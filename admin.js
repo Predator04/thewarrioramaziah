@@ -31,9 +31,33 @@ function bindBasicFields() {
   });
 }
 
-function field(label, value, onInput, type = "text") {
+const helpText = {
+  statLabel: "What this stat is called, like Record, Weight Class, Stance, or Fighting Out Of.",
+  statValue: "The actual value visitors see for this stat. Use TBA if you do not know yet.",
+  eventTitle: "The public event name, like Columbia Appearance or Fight Night.",
+  eventType: "What kind of event this is, such as Fight, Appearance, Weigh-in, Pop-up, or Signing.",
+  eventDate: "Simple date text visitors see. Example: Date TBA or June 14, 2026.",
+  countdownDate: "Optional exact date/time for the countdown. Leave blank until the event date is confirmed.",
+  eventLocation: "City, venue, gym, or event location.",
+  eventLinkLabel: "Text on the event link. Example: Tickets, Details Soon, RSVP, or Watch Live.",
+  eventUrl: "Where the event link goes. Use # if there is no link yet.",
+  eventNote: "Short extra detail shown under the event title.",
+  itemName: "Name of this fight kit item or future merch item.",
+  itemStatus: "Small label above the item name. Example: Fight Kit, Preview, Coming Later.",
+  itemPrice: "Use Not for sale for fight kit, or add a price when fan merch is ready.",
+  itemColors: "Colors shown on the card.",
+  itemSizes: "Sizes or status. For fight kit, Team gear works well.",
+  itemDescription: "Short description visitors read under the item name.",
+  itemImage: "Main card image. Upload a photo or paste an image URL.",
+  mediaTitle: "Name shown under the media image.",
+  mediaType: "Small label above the media title. Example: Training, Fight Kit, Fight Week.",
+  mediaImage: "Gallery image. Upload a photo or paste an image URL."
+};
+
+function field(label, value, onInput, type = "text", help = "") {
   const wrapper = document.createElement("label");
   wrapper.textContent = label;
+  if (help) wrapper.dataset.help = help;
   const input = type === "textarea" ? document.createElement("textarea") : document.createElement("input");
   if (type !== "textarea") input.type = type;
   input.value = value || "";
@@ -42,10 +66,10 @@ function field(label, value, onInput, type = "text") {
   return wrapper;
 }
 
-function imageField(label, value, onInput) {
+function imageField(label, value, onInput, help = "") {
   const wrapper = document.createElement("div");
   wrapper.className = "image-preview full";
-  const textInput = field(label, value, onInput);
+  const textInput = field(label, value, onInput, "text", help);
   const img = document.createElement("img");
   img.src = value || "";
   img.alt = "";
@@ -73,8 +97,8 @@ function renderStatsEditor() {
     const row = document.createElement("div");
     row.className = "admin-repeat";
     row.append(
-      field("Label", stat.label, (value) => (stat.label = value)),
-      field("Value", stat.value, (value) => (stat.value = value))
+      field("Stat Name", stat.label, (value) => (stat.label = value), "text", helpText.statLabel),
+      field("Stat Value", stat.value, (value) => (stat.value = value), "text", helpText.statValue)
     );
     root.append(row);
   });
@@ -88,14 +112,14 @@ function renderEventsEditor() {
     row.className = "admin-repeat";
     row.append(
       Object.assign(document.createElement("h3"), { textContent: `Event ${index + 1}` }),
-      field("Title", event.title, (value) => (event.title = value)),
-      field("Type", event.type, (value) => (event.type = value)),
-      field("Date Text", event.date, (value) => (event.date = value)),
-      field("Countdown Date", event.countdownDate, (value) => (event.countdownDate = value), "datetime-local"),
-      field("Location", event.location, (value) => (event.location = value)),
-      field("Link Label", event.linkLabel, (value) => (event.linkLabel = value)),
-      field("URL", event.url, (value) => (event.url = value)),
-      field("Note", event.note, (value) => (event.note = value), "textarea")
+      field("Event Name", event.title, (value) => (event.title = value), "text", helpText.eventTitle),
+      field("Event Type", event.type, (value) => (event.type = value), "text", helpText.eventType),
+      field("Displayed Date", event.date, (value) => (event.date = value), "text", helpText.eventDate),
+      field("Countdown Date and Time", event.countdownDate, (value) => (event.countdownDate = value), "datetime-local", helpText.countdownDate),
+      field("Location", event.location, (value) => (event.location = value), "text", helpText.eventLocation),
+      field("Link Button Text", event.linkLabel, (value) => (event.linkLabel = value), "text", helpText.eventLinkLabel),
+      field("Link URL", event.url, (value) => (event.url = value), "text", helpText.eventUrl),
+      field("Event Note", event.note, (value) => (event.note = value), "textarea", helpText.eventNote)
     );
     root.append(row);
   });
@@ -110,13 +134,13 @@ function renderProductsEditor() {
     row.className = "admin-repeat";
     row.append(
       Object.assign(document.createElement("h3"), { textContent: `Item ${index + 1}` }),
-      field("Name", product.name, (value) => (product.name = value)),
-      field("Status", product.status, (value) => (product.status = value)),
-      field("Price", product.price, (value) => (product.price = value)),
-      field("Colors", product.colors, (value) => (product.colors = value)),
-      field("Sizes", product.sizes, (value) => (product.sizes = value)),
-      field("Description", product.description, (value) => (product.description = value), "textarea"),
-      imageField("Main Image URL or Upload", product.image, (value) => (product.image = value))
+      field("Item Name", product.name, (value) => (product.name = value), "text", helpText.itemName),
+      field("Small Status Label", product.status, (value) => (product.status = value), "text", helpText.itemStatus),
+      field("Price / Availability", product.price, (value) => (product.price = value), "text", helpText.itemPrice),
+      field("Colors", product.colors, (value) => (product.colors = value), "text", helpText.itemColors),
+      field("Sizes / Fit", product.sizes, (value) => (product.sizes = value), "text", helpText.itemSizes),
+      field("Item Description", product.description, (value) => (product.description = value), "textarea", helpText.itemDescription),
+      imageField("Main Card Image", product.image, (value) => (product.image = value), helpText.itemImage)
     );
     root.append(row);
   });
@@ -130,9 +154,9 @@ function renderMediaEditor() {
     row.className = "admin-repeat";
     row.append(
       Object.assign(document.createElement("h3"), { textContent: `Media ${index + 1}` }),
-      field("Title", item.title, (value) => (item.title = value)),
-      field("Type", item.type, (value) => (item.type = value)),
-      imageField("Image URL or Upload", item.image, (value) => (item.image = value))
+      field("Media Title", item.title, (value) => (item.title = value), "text", helpText.mediaTitle),
+      field("Media Type Label", item.type, (value) => (item.type = value), "text", helpText.mediaType),
+      imageField("Media Image", item.image, (value) => (item.image = value), helpText.mediaImage)
     );
     root.append(row);
   });
