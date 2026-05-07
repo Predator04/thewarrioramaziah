@@ -148,7 +148,21 @@ function renderMedia() {
     .join("");
 }
 
-function renderSiteData() {
+async function loadEditableSiteData() {
+  try {
+    const response = await fetch("/api/site-data", { cache: "no-store" });
+    if (!response.ok) return;
+    const saved = await response.json();
+    if (saved && typeof saved === "object") {
+      Object.assign(siteData, saved);
+    }
+  } catch (error) {
+    // Local file previews do not have the Worker API. Static data is fine there.
+  }
+}
+
+async function renderSiteData() {
+  await loadEditableSiteData();
   setText("[data-brand]", siteData.brandName);
   setText("[data-hero-title]", siteData.tagline);
   setText("[data-hero-copy]", siteData.heroCopy);

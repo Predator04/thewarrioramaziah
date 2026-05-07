@@ -1,0 +1,192 @@
+const DATA_KEY = "site-data";
+const SESSION_COOKIE = "warrior_admin";
+const SESSION_TTL_SECONDS = 60 * 60 * 8;
+
+function json(data, init = {}) {
+  return new Response(JSON.stringify(data), {
+    ...init,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      ...(init.headers || {})
+    }
+  });
+}
+
+function text(data, init = {}) {
+  return new Response(data, {
+    ...init,
+    headers: {
+      "content-type": "text/plain; charset=utf-8",
+      "cache-control": "no-store",
+      ...(init.headers || {})
+    }
+  });
+}
+
+function parseCookies(request) {
+  return Object.fromEntries(
+    (request.headers.get("cookie") || "")
+      .split(";")
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => {
+        const index = part.indexOf("=");
+        return [part.slice(0, index), part.slice(index + 1)];
+      })
+  );
+}
+
+function base64Url(buffer) {
+  let binary = "";
+  new Uint8Array(buffer).forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+}
+
+function bytesFromBase64Url(value) {
+  const padded = value.replaceAll("-", "+").replaceAll("_", "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
+  return Uint8Array.from(atob(padded), (char) => char.charCodeAt(0));
+}
+
+async function importHmacKey(secret) {
+  return crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [
+    "sign",
+    "verify"
+  ]);
+}
+
+async function signSession(payload, secret) {
+  const body = base64Url(new TextEncoder().encode(JSON.stringify(payload)));
+  const key = await importHmacKey(secret);
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body));
+  return `${body}.${base64Url(signature)}`;
+}
+
+async function verifySession(token, secret) {
+  if (!token || !token.includes(".")) return false;
+  const [body, signature] = token.split(".");
+  const key = await importHmacKey(secret);
+  const valid = await crypto.subtle.verify("HMAC", key, bytesFromBase64Url(signature), new TextEncoder().encode(body));
+  if (!valid) return false;
+  const payload = JSON.parse(new TextDecoder().decode(bytesFromBase64Url(body)));
+  return payload.exp && payload.exp > Math.floor(Date.now() / 1000);
+}
+
+async function isAuthed(request, env) {
+  const cookies = parseCookies(request);
+  return verifySession(cookies[SESSION_COOKIE], env.ADMIN_SESSION_SECRET);
+}
+
+async function requireAuth(request, env) {
+  if (await isAuthed(request, env)) return null;
+  return json({ error: "Unauthorized" }, { status: 401 });
+}
+
+async function getStoredData(env) {
+  return (await env.SITE_KV.get(DATA_KEY, "json")) || null;
+}
+
+async function handleLogin(request, env) {
+  const body = await request.json().catch(() => ({}));
+  if (!env.ADMIN_PASSWORD || body.password !== env.ADMIN_PASSWORD) {
+    return json({ error: "Invalid password" }, { status: 401 });
+  }
+
+  const token = await signSession(
+    {
+      sub: "admin",
+      exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS
+    },
+    env.ADMIN_SESSION_SECRET
+  );
+
+  return json(
+    { ok: true },
+    {
+      headers: {
+        "set-cookie": `${SESSION_COOKIE}=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_TTL_SECONDS}`
+      }
+    }
+  );
+}
+
+function validateData(data) {
+  if (!data || typeof data !== "object") return "Missing site data.";
+  if (!Array.isArray(data.products) || !Array.isArray(data.events) || !Array.isArray(data.stats)) {
+    return "Site data must include products, events, and stats lists.";
+  }
+  const serialized = JSON.stringify(data);
+  if (serialized.length > 8000000) return "Site data is too large. Compress photos before uploading.";
+  return null;
+}
+
+async function handleUpload(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const form = await request.formData();
+  const file = form.get("file");
+  if (!file || typeof file === "string") return json({ error: "Missing file." }, { status: 400 });
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    return json({ error: "Only JPG, PNG, or WebP images are allowed." }, { status: 400 });
+  }
+  if (file.size > 1500000) {
+    return json({ error: "Image is too large. Keep uploads under 1.5 MB for now." }, { status: 400 });
+  }
+  const buffer = await file.arrayBuffer();
+  return json({
+    src: `data:${file.type};base64,${base64Url(buffer).replaceAll("-", "+").replaceAll("_", "/")}`
+  });
+}
+
+async function handleSave(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const data = await request.json().catch(() => null);
+  const validationError = validateData(data);
+  if (validationError) return json({ error: validationError }, { status: 400 });
+
+  await env.SITE_KV.put(DATA_KEY, JSON.stringify(data));
+  return json({ ok: true });
+}
+
+async function handleLogout() {
+  return json(
+    { ok: true },
+    {
+      headers: {
+        "set-cookie": `${SESSION_COOKIE}=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`
+      }
+    }
+  );
+}
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/api/site-data") {
+      return json(await getStoredData(env));
+    }
+
+    if (url.pathname === "/api/admin/status") {
+      return json({ authenticated: await isAuthed(request, env) });
+    }
+
+    if (url.pathname === "/api/admin/login" && request.method === "POST") return handleLogin(request, env);
+    if (url.pathname === "/api/admin/logout" && request.method === "POST") return handleLogout();
+    if (url.pathname === "/api/admin/save" && request.method === "POST") return handleSave(request, env);
+    if (url.pathname === "/api/admin/upload" && request.method === "POST") return handleUpload(request, env);
+
+    if (url.pathname === "/admin") {
+      return env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
+    }
+
+    const response = await env.ASSETS.fetch(request);
+    if (response.status !== 404) return response;
+    return env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
+  }
+};

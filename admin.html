@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin | The Warrior Amaziah</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="site-data.js" defer></script>
+    <script src="admin.js" defer></script>
+  </head>
+  <body class="admin-body">
+    <main class="admin-shell">
+      <section class="admin-login" data-login>
+        <p class="eyebrow">Private admin</p>
+        <h1>The Warrior Amaziah</h1>
+        <form data-login-form>
+          <label>
+            Password
+            <input type="password" name="password" autocomplete="current-password" required>
+          </label>
+          <button class="button primary" type="submit">Log In</button>
+        </form>
+        <p class="admin-message" data-login-message></p>
+      </section>
+
+      <section class="admin-panel" data-admin hidden>
+        <header class="admin-topbar">
+          <div>
+            <p class="eyebrow">Site editor</p>
+            <h1>Update the website</h1>
+          </div>
+          <div class="admin-actions">
+            <a class="button secondary" href="/">View Site</a>
+            <button class="button secondary" type="button" data-logout>Log Out</button>
+            <button class="button primary" type="button" data-save>Save Changes</button>
+          </div>
+        </header>
+
+        <p class="admin-message" data-save-message></p>
+
+        <section class="admin-grid">
+          <article class="admin-card">
+            <h2>Home + About</h2>
+            <label>Brand Name<input data-field="brandName"></label>
+            <label>Homepage Headline<textarea data-field="tagline"></textarea></label>
+            <label>Homepage Copy<textarea data-field="heroCopy"></textarea></label>
+            <label>Booking Email<input data-field="bookingEmail" type="email"></label>
+            <label>About Headline<textarea data-field="aboutTitle"></textarea></label>
+            <label>About Copy<textarea data-field="aboutCopy"></textarea></label>
+          </article>
+
+          <article class="admin-card">
+            <h2>Fighter Stats</h2>
+            <div data-stats-editor></div>
+          </article>
+
+          <article class="admin-card wide">
+            <h2>Events</h2>
+            <div data-events-editor></div>
+            <button class="button secondary" type="button" data-add-event>Add Event</button>
+          </article>
+
+          <article class="admin-card wide">
+            <h2>Fight Kit / Products</h2>
+            <div data-products-editor></div>
+            <button class="button secondary" type="button" data-add-product>Add Item</button>
+          </article>
+
+          <article class="admin-card wide">
+            <h2>Media Gallery</h2>
+            <div data-media-editor></div>
+            <button class="button secondary" type="button" data-add-media>Add Media Item</button>
+          </article>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

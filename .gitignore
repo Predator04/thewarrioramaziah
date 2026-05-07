@@ -4,3 +4,5 @@ _site
 .wrangler
 jacket.jpeg
 shorts.jpeg
+admin-password.txt
+.admin-secrets.tmp
