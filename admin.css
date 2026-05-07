@@ -39,6 +39,26 @@
   gap: 10px;
 }
 
+.admin-bottom-actions {
+  align-items: center;
+  background: rgba(7, 5, 13, 0.94);
+  border: 1px solid var(--line);
+  bottom: 14px;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-top: 22px;
+  padding: 14px;
+  position: sticky;
+  z-index: 8;
+}
+
+.admin-bottom-actions p {
+  color: var(--muted);
+  font-weight: 800;
+  margin: 0;
+}
+
 .admin-grid {
   display: grid;
   gap: 18px;
@@ -184,6 +204,11 @@
 
   .admin-topbar {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-bottom-actions {
+    align-items: stretch;
     flex-direction: column;
   }
 }

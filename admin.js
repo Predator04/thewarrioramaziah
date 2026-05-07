@@ -199,7 +199,7 @@ $("[data-login-form]").addEventListener("submit", async (event) => {
   }
 });
 
-$("[data-save]").addEventListener("click", async () => {
+document.querySelectorAll("[data-save]").forEach((button) => button.addEventListener("click", async () => {
   setMessage("[data-save-message]", "Saving...");
   try {
     await api("/api/admin/save", { method: "POST", body: JSON.stringify(draft) });
@@ -207,7 +207,7 @@ $("[data-save]").addEventListener("click", async () => {
   } catch (error) {
     setMessage("[data-save-message]", error.message);
   }
-});
+}));
 
 $("[data-logout]").addEventListener("click", async () => {
   await api("/api/admin/logout", { method: "POST" });
