@@ -148,6 +148,40 @@ function renderMedia() {
     .join("");
 }
 
+function renderSocials() {
+  document.querySelectorAll("[data-socials]").forEach((container) => {
+    container.innerHTML = (siteData.socials || [])
+      .filter((social) => social.url && social.url !== "#")
+      .map((social) => `<a href="${social.url}" rel="noopener" target="_blank">${social.label}</a>`)
+      .join("");
+  });
+}
+
+function setupContactForm() {
+  const form = document.querySelector("[data-contact-form]");
+  if (!form) return;
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const message = document.querySelector("[data-contact-message]");
+    message.textContent = "Sending...";
+    const data = Object.fromEntries(new FormData(form).entries());
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not send request.");
+      form.reset();
+      message.textContent = "Request sent. The team will follow up.";
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  });
+}
+
 async function loadEditableSiteData() {
   try {
     const response = await fetch("/api/site-data", { cache: "no-store" });
@@ -185,6 +219,8 @@ async function renderSiteData() {
   renderStats();
   renderCountdown();
   renderMedia();
+  renderSocials();
+  setupContactForm();
 }
 
 document.addEventListener("DOMContentLoaded", renderSiteData);

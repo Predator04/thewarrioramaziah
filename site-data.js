@@ -4,6 +4,11 @@ const siteData = {
   heroCopy:
     "A faith-driven boxer building his name through discipline, pressure, and the next fight ahead.",
   bookingEmail: "booking@example.com",
+  socials: [
+    { label: "Instagram", url: "#" },
+    { label: "TikTok", url: "#" },
+    { label: "YouTube", url: "#" }
+  ],
   aboutTitle: "Built on faith. Tested under pressure.",
   aboutCopy:
     "This section is ready for the boxer's real story: where he is from, what he fights for, and why fans should follow the journey.",

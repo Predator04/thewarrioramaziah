@@ -34,6 +34,8 @@ function bindBasicFields() {
 const helpText = {
   statLabel: "What this stat is called, like Record, Weight Class, Stance, or Fighting Out Of.",
   statValue: "The actual value visitors see for this stat. Use TBA if you do not know yet.",
+  socialLabel: "The name visitors see, like Instagram, TikTok, YouTube, or Facebook.",
+  socialUrl: "Paste the full profile link. Leave # to hide it from the public site.",
   eventTitle: "The public event name, like Columbia Appearance or Fight Night.",
   eventType: "What kind of event this is, such as Fight, Appearance, Weigh-in, Pop-up, or Signing.",
   eventDate: "Simple date text visitors see. Example: Date TBA or June 14, 2026.",
@@ -81,6 +83,11 @@ function imageField(label, value, onInput, help = "") {
   file.addEventListener("change", async () => {
     const selected = file.files[0];
     if (!selected) return;
+    if (selected.size > 1500000) {
+      alert("That image is too large. Please use an image under 1.5 MB.");
+      file.value = "";
+      return;
+    }
     const form = new FormData();
     form.append("file", selected);
     const result = await api("/api/admin/upload", { method: "POST", body: form });
@@ -101,6 +108,31 @@ function renderStatsEditor() {
     row.append(
       field("Stat Name", stat.label, (value) => (stat.label = value), "text", helpText.statLabel),
       field("Stat Value", stat.value, (value) => (stat.value = value), "text", helpText.statValue)
+    );
+    root.append(row);
+  });
+}
+
+function renderSocialsEditor() {
+  const root = $("[data-socials-editor]");
+  root.innerHTML = "";
+  draft.socials ||= [];
+  draft.socials.forEach((social, index) => {
+    const row = document.createElement("div");
+    row.className = "admin-repeat";
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "danger-button full";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete This Social Link";
+    deleteButton.addEventListener("click", () => {
+      if (!confirm(`Delete social link "${social.label}"?`)) return;
+      draft.socials.splice(index, 1);
+      renderSocialsEditor();
+    });
+    row.append(
+      field("Social Platform Name", social.label, (value) => (social.label = value), "text", helpText.socialLabel),
+      field("Social Profile URL", social.url, (value) => (social.url = value), "text", helpText.socialUrl),
+      deleteButton
     );
     root.append(row);
   });
@@ -209,9 +241,37 @@ function renderMediaEditor() {
 function renderEditors() {
   bindBasicFields();
   renderStatsEditor();
+  renderSocialsEditor();
   renderEventsEditor();
   renderProductsEditor();
   renderMediaEditor();
+}
+
+async function loadSubmissions() {
+  const root = $("[data-submissions]");
+  if (!root) return;
+  root.textContent = "Loading requests...";
+  try {
+    const result = await api("/api/admin/submissions");
+    if (!result.submissions.length) {
+      root.textContent = "No requests yet.";
+      return;
+    }
+    root.innerHTML = "";
+    result.submissions.forEach((submission) => {
+      const row = document.createElement("div");
+      row.className = "admin-repeat";
+      row.append(
+        Object.assign(document.createElement("h3"), { textContent: `${submission.type || "Request"} - ${submission.name || "No name"}` }),
+        Object.assign(document.createElement("time"), { textContent: new Date(submission.createdAt).toLocaleString() }),
+        field("Email", submission.email || "", () => {}),
+        field("Message", submission.message || "", () => {}, "textarea")
+      );
+      root.append(row);
+    });
+  } catch (error) {
+    root.textContent = error.message;
+  }
 }
 
 async function loadDraft() {
@@ -226,6 +286,7 @@ async function initAdmin() {
     $("[data-login]").hidden = true;
     $("[data-admin]").hidden = false;
     await loadDraft();
+    await loadSubmissions();
   }
 }
 
@@ -263,6 +324,37 @@ $("[data-export]").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
+$("[data-import]").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const imported = JSON.parse(await file.text());
+    if (!imported.products || !imported.events || !imported.stats) throw new Error("Backup file does not look valid.");
+    draft = imported;
+    renderEditors();
+    setMessage("[data-save-message]", "Backup loaded. Click Save Changes to publish it.");
+  } catch (error) {
+    setMessage("[data-save-message]", error.message);
+  } finally {
+    event.target.value = "";
+  }
+});
+
+$("[data-refresh-submissions]").addEventListener("click", loadSubmissions);
+
+$("[data-change-password]").addEventListener("click", async () => {
+  const input = $("[data-new-password]");
+  const password = input.value.trim();
+  setMessage("[data-save-message]", "Changing password...");
+  try {
+    await api("/api/admin/change-password", { method: "POST", body: JSON.stringify({ password }) });
+    input.value = "";
+    setMessage("[data-save-message]", "Password changed.");
+  } catch (error) {
+    setMessage("[data-save-message]", error.message);
+  }
+});
+
 $("[data-logout]").addEventListener("click", async () => {
   await api("/api/admin/logout", { method: "POST" });
   location.reload();
@@ -271,6 +363,12 @@ $("[data-logout]").addEventListener("click", async () => {
 $("[data-add-event]").addEventListener("click", () => {
   draft.events.push({ title: "New Event", type: "Appearance", date: "Date TBA", countdownDate: "", location: "", note: "", linkLabel: "Details soon", url: "#" });
   renderEventsEditor();
+});
+
+$("[data-add-social]").addEventListener("click", () => {
+  draft.socials ||= [];
+  draft.socials.push({ label: "New Link", url: "#" });
+  renderSocialsEditor();
 });
 
 $("[data-add-product]").addEventListener("click", () => {

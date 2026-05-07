@@ -1,4 +1,6 @@
 const DATA_KEY = "site-data";
+const PASSWORD_KEY = "admin-password";
+const SUBMISSION_PREFIX = "submission:";
 const SESSION_COOKIE = "warrior_admin";
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
@@ -74,6 +76,32 @@ async function verifySession(token, secret) {
   return payload.exp && payload.exp > Math.floor(Date.now() / 1000);
 }
 
+async function sha256(value) {
+  return base64Url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
+}
+
+function randomToken(bytes = 18) {
+  const data = new Uint8Array(bytes);
+  crypto.getRandomValues(data);
+  return base64Url(data);
+}
+
+async function passwordHash(password, salt) {
+  return sha256(`${salt}:${password}`);
+}
+
+async function getPasswordRecord(env) {
+  return env.SITE_KV.get(PASSWORD_KEY, "json");
+}
+
+async function passwordMatches(password, env) {
+  const record = await getPasswordRecord(env);
+  if (record?.salt && record?.hash) {
+    return (await passwordHash(password, record.salt)) === record.hash;
+  }
+  return password === env.ADMIN_PASSWORD;
+}
+
 async function isAuthed(request, env) {
   const cookies = parseCookies(request);
   return verifySession(cookies[SESSION_COOKIE], env.ADMIN_SESSION_SECRET);
@@ -90,7 +118,7 @@ async function getStoredData(env) {
 
 async function handleLogin(request, env) {
   const body = await request.json().catch(() => ({}));
-  if (!env.ADMIN_PASSWORD || body.password !== env.ADMIN_PASSWORD) {
+  if (!body.password || !(await passwordMatches(body.password, env))) {
     return json({ error: "Invalid password" }, { status: 401 });
   }
 
@@ -110,6 +138,18 @@ async function handleLogin(request, env) {
       }
     }
   );
+}
+
+async function handleChangePassword(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const body = await request.json().catch(() => ({}));
+  const password = String(body.password || "");
+  if (password.length < 10) return json({ error: "Use at least 10 characters." }, { status: 400 });
+  const salt = randomToken();
+  await env.SITE_KV.put(PASSWORD_KEY, JSON.stringify({ salt, hash: await passwordHash(password, salt), changedAt: new Date().toISOString() }));
+  return json({ ok: true });
 }
 
 function validateData(data) {
@@ -139,6 +179,39 @@ async function handleUpload(request, env) {
   return json({
     src: `data:${file.type};base64,${base64Url(buffer).replaceAll("-", "+").replaceAll("_", "/")}`
   });
+}
+
+async function handleContact(request, env) {
+  const body = await request.json().catch(() => ({}));
+  const name = String(body.name || "").trim();
+  const email = String(body.email || "").trim();
+  const type = String(body.type || "Other").trim();
+  const message = String(body.message || "").trim();
+
+  if (!name || !email || !message) return json({ error: "Name, email, and message are required." }, { status: 400 });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Use a valid email address." }, { status: 400 });
+  if (message.length > 4000) return json({ error: "Message is too long." }, { status: 400 });
+
+  const submission = {
+    id: randomToken(12),
+    createdAt: new Date().toISOString(),
+    name,
+    email,
+    type,
+    message
+  };
+  await env.SITE_KV.put(`${SUBMISSION_PREFIX}${Date.now()}:${submission.id}`, JSON.stringify(submission));
+  return json({ ok: true });
+}
+
+async function handleSubmissions(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const list = await env.SITE_KV.list({ prefix: SUBMISSION_PREFIX, limit: 25 });
+  const submissions = await Promise.all(list.keys.map((key) => env.SITE_KV.get(key.name, "json")));
+  submissions.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  return json({ submissions });
 }
 
 async function handleSave(request, env) {
@@ -180,6 +253,9 @@ export default {
     if (url.pathname === "/api/admin/logout" && request.method === "POST") return handleLogout();
     if (url.pathname === "/api/admin/save" && request.method === "POST") return handleSave(request, env);
     if (url.pathname === "/api/admin/upload" && request.method === "POST") return handleUpload(request, env);
+    if (url.pathname === "/api/admin/change-password" && request.method === "POST") return handleChangePassword(request, env);
+    if (url.pathname === "/api/admin/submissions") return handleSubmissions(request, env);
+    if (url.pathname === "/api/contact" && request.method === "POST") return handleContact(request, env);
 
     if (url.pathname === "/admin") {
       return env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));

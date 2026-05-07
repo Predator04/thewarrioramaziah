@@ -168,6 +168,11 @@
   margin: 0;
 }
 
+.admin-repeat time {
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .danger-button {
   background: rgba(255, 82, 82, 0.12);
   border: 1px solid rgba(255, 82, 82, 0.45);
@@ -183,6 +188,19 @@
   color: var(--hot);
   font-weight: 800;
   min-height: 1.4em;
+}
+
+.backup-upload {
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+
+.backup-upload input {
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .admin-help {

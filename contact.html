@@ -41,11 +41,31 @@
           <a class="button primary" data-booking-link href="mailto:booking@example.com">Sponsor Inquiry</a>
         </article>
       </section>
+
+      <section class="admin-card public-form-card">
+        <p class="eyebrow">Contact form</p>
+        <h2>Send a request.</h2>
+        <form class="contact-form" data-contact-form>
+          <label>Name<input name="name" autocomplete="name" required></label>
+          <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>Request Type
+            <select name="type">
+              <option>Booking</option>
+              <option>Sponsorship</option>
+              <option>Media</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>Message<textarea name="message" required></textarea></label>
+          <button class="button primary" type="submit">Send Request</button>
+          <p class="form-message" data-contact-message></p>
+        </form>
+      </section>
     </main>
 
     <footer class="site-footer">
       <span data-brand>The Warrior Amaziah</span>
-      <a href="merch.html">Shop Merch</a>
+      <div class="social-links" data-socials></div>
     </footer>
   </body>
 </html>
