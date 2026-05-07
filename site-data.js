@@ -1,4 +1,7 @@
 const siteData = {
+  meta: {
+    lastSavedAt: ""
+  },
   brandName: "The Warrior Amaziah",
   tagline: "The warrior story starts before the bell.",
   heroCopy:

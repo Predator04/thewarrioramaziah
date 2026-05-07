@@ -1,6 +1,7 @@
 const DATA_KEY = "site-data";
 const PASSWORD_KEY = "admin-password";
 const SUBMISSION_PREFIX = "submission:";
+const RATE_PREFIX = "rate:";
 const SESSION_COOKIE = "warrior_admin";
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
@@ -116,7 +117,27 @@ async function getStoredData(env) {
   return (await env.SITE_KV.get(DATA_KEY, "json")) || null;
 }
 
+function getClientKey(request) {
+  return request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || "unknown";
+}
+
+async function rateLimit(request, env, bucket, limit, windowSeconds) {
+  const key = `${RATE_PREFIX}${bucket}:${getClientKey(request)}`;
+  const record = (await env.SITE_KV.get(key, "json")) || { count: 0 };
+  const count = Number(record.count || 0) + 1;
+  if (count > limit) {
+    return json({ error: "Too many tries. Wait a few minutes and try again." }, { status: 429 });
+  }
+  await env.SITE_KV.put(key, JSON.stringify({ count, updatedAt: new Date().toISOString() }), {
+    expirationTtl: windowSeconds
+  });
+  return null;
+}
+
 async function handleLogin(request, env) {
+  const limited = await rateLimit(request, env, "login", 12, 300);
+  if (limited) return limited;
+
   const body = await request.json().catch(() => ({}));
   if (!body.password || !(await passwordMatches(body.password, env))) {
     return json({ error: "Invalid password" }, { status: 401 });
@@ -182,6 +203,9 @@ async function handleUpload(request, env) {
 }
 
 async function handleContact(request, env) {
+  const limited = await rateLimit(request, env, "contact", 8, 600);
+  if (limited) return limited;
+
   const body = await request.json().catch(() => ({}));
   const name = String(body.name || "").trim();
   const email = String(body.email || "").trim();
@@ -198,7 +222,8 @@ async function handleContact(request, env) {
     name,
     email,
     type,
-    message
+    message,
+    reviewed: false
   };
   await env.SITE_KV.put(`${SUBMISSION_PREFIX}${Date.now()}:${submission.id}`, JSON.stringify(submission));
   return json({ ok: true });
@@ -209,9 +234,39 @@ async function handleSubmissions(request, env) {
   if (auth) return auth;
 
   const list = await env.SITE_KV.list({ prefix: SUBMISSION_PREFIX, limit: 25 });
-  const submissions = await Promise.all(list.keys.map((key) => env.SITE_KV.get(key.name, "json")));
+  const submissions = await Promise.all(
+    list.keys.map(async (key) => ({ ...((await env.SITE_KV.get(key.name, "json")) || {}), key: key.name }))
+  );
   submissions.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
   return json({ submissions });
+}
+
+async function handleSubmissionUpdate(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const body = await request.json().catch(() => ({}));
+  const key = String(body.key || "");
+  if (!key.startsWith(SUBMISSION_PREFIX)) return json({ error: "Missing request key." }, { status: 400 });
+
+  const submission = await env.SITE_KV.get(key, "json");
+  if (!submission) return json({ error: "Request not found." }, { status: 404 });
+
+  submission.reviewed = Boolean(body.reviewed);
+  submission.reviewedAt = submission.reviewed ? new Date().toISOString() : "";
+  await env.SITE_KV.put(key, JSON.stringify(submission));
+  return json({ ok: true });
+}
+
+async function handleSubmissionDelete(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const body = await request.json().catch(() => ({}));
+  const key = String(body.key || "");
+  if (!key.startsWith(SUBMISSION_PREFIX)) return json({ error: "Missing request key." }, { status: 400 });
+  await env.SITE_KV.delete(key);
+  return json({ ok: true });
 }
 
 async function handleSave(request, env) {
@@ -222,8 +277,12 @@ async function handleSave(request, env) {
   const validationError = validateData(data);
   if (validationError) return json({ error: validationError }, { status: 400 });
 
+  data.meta = {
+    ...(data.meta || {}),
+    lastSavedAt: new Date().toISOString()
+  };
   await env.SITE_KV.put(DATA_KEY, JSON.stringify(data));
-  return json({ ok: true });
+  return json({ ok: true, lastSavedAt: data.meta.lastSavedAt });
 }
 
 async function handleLogout() {
@@ -255,6 +314,8 @@ export default {
     if (url.pathname === "/api/admin/upload" && request.method === "POST") return handleUpload(request, env);
     if (url.pathname === "/api/admin/change-password" && request.method === "POST") return handleChangePassword(request, env);
     if (url.pathname === "/api/admin/submissions") return handleSubmissions(request, env);
+    if (url.pathname === "/api/admin/submissions/update" && request.method === "POST") return handleSubmissionUpdate(request, env);
+    if (url.pathname === "/api/admin/submissions/delete" && request.method === "POST") return handleSubmissionDelete(request, env);
     if (url.pathname === "/api/contact" && request.method === "POST") return handleContact(request, env);
 
     if (url.pathname === "/admin") {
@@ -263,6 +324,7 @@ export default {
 
     const response = await env.ASSETS.fetch(request);
     if (response.status !== 404) return response;
-    return env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
+    const notFound = await env.ASSETS.fetch(new Request(new URL("/404.html", url), request));
+    return new Response(notFound.body, { status: 404, headers: notFound.headers });
   }
 };

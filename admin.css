@@ -190,6 +190,10 @@
   min-height: 1.4em;
 }
 
+.save-stamp {
+  margin: -8px 0 8px;
+}
+
 .backup-upload {
   cursor: pointer;
   overflow: hidden;
@@ -222,6 +226,16 @@
   max-height: 180px;
   object-fit: contain;
   width: 100%;
+}
+
+.review-status {
+  color: var(--hot);
+  font-weight: 900;
+  margin: 0;
+}
+
+.review-status.reviewed {
+  color: #8fffc1;
 }
 
 @media (max-width: 820px) {

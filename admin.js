@@ -21,6 +21,12 @@ function setMessage(selector, message) {
   $(selector).textContent = message || "";
 }
 
+function setLastSaved(value) {
+  const label = $("[data-last-saved]");
+  if (!label) return;
+  label.textContent = value ? `Last saved: ${new Date(value).toLocaleString()}` : "Last saved: not published from admin yet";
+}
+
 function bindBasicFields() {
   document.querySelectorAll("[data-field]").forEach((input) => {
     const key = input.dataset.field;
@@ -70,6 +76,33 @@ function field(label, value, onInput, type = "text", help = "") {
   return wrapper;
 }
 
+async function resizeImageFile(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Choose a JPG, PNG, or WebP image.");
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = () => reject(new Error("Could not read that image."));
+      img.src = url;
+    });
+
+    const longestSide = Math.max(img.naturalWidth, img.naturalHeight);
+    const scale = Math.min(1, 1400 / longestSide);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    const context = canvas.getContext("2d");
+    context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.84));
+    if (!blob) throw new Error("Could not resize that image.");
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 function imageField(label, value, onInput, help = "") {
   const wrapper = document.createElement("div");
   wrapper.className = "image-preview full";
@@ -83,17 +116,22 @@ function imageField(label, value, onInput, help = "") {
   file.addEventListener("change", async () => {
     const selected = file.files[0];
     if (!selected) return;
-    if (selected.size > 1500000) {
-      alert("That image is too large. Please use an image under 1.5 MB.");
+    try {
+      const uploadFile = await resizeImageFile(selected);
+      if (uploadFile.size > 1500000) {
+        throw new Error("That image is still too large after resizing. Try a simpler photo or crop it tighter.");
+      }
+      const form = new FormData();
+      form.append("file", uploadFile);
+      const result = await api("/api/admin/upload", { method: "POST", body: form });
+      onInput(result.src);
+      textInput.querySelector("input").value = result.src;
+      img.src = result.src;
+    } catch (error) {
+      alert(error.message);
+    } finally {
       file.value = "";
-      return;
     }
-    const form = new FormData();
-    form.append("file", selected);
-    const result = await api("/api/admin/upload", { method: "POST", body: form });
-    onInput(result.src);
-    textInput.querySelector("input").value = result.src;
-    img.src = result.src;
   });
   wrapper.append(textInput, img, file);
   return wrapper;
@@ -263,9 +301,14 @@ async function loadSubmissions() {
       row.className = "admin-repeat";
       row.append(
         Object.assign(document.createElement("h3"), { textContent: `${submission.type || "Request"} - ${submission.name || "No name"}` }),
+        Object.assign(document.createElement("p"), {
+          className: submission.reviewed ? "review-status reviewed full" : "review-status full",
+          textContent: submission.reviewed ? "Reviewed" : "Needs review"
+        }),
         Object.assign(document.createElement("time"), { textContent: new Date(submission.createdAt).toLocaleString() }),
         field("Email", submission.email || "", () => {}),
-        field("Message", submission.message || "", () => {}, "textarea")
+        field("Message", submission.message || "", () => {}, "textarea"),
+        requestActions(submission)
       );
       root.append(row);
     });
@@ -277,7 +320,43 @@ async function loadSubmissions() {
 async function loadDraft() {
   const saved = await api("/api/site-data");
   draft = saved || clone(siteData);
+  draft.meta ||= {};
+  setLastSaved(draft.meta.lastSavedAt);
   renderEditors();
+}
+
+function requestActions(submission) {
+  const actions = document.createElement("div");
+  actions.className = "admin-actions full";
+  const reviewed = document.createElement("button");
+  reviewed.className = "button secondary";
+  reviewed.type = "button";
+  reviewed.textContent = submission.reviewed ? "Mark Not Reviewed" : "Mark Reviewed";
+  reviewed.addEventListener("click", async () => {
+    reviewed.disabled = true;
+    await api("/api/admin/submissions/update", {
+      method: "POST",
+      body: JSON.stringify({ key: submission.key, reviewed: !submission.reviewed })
+    });
+    await loadSubmissions();
+  });
+
+  const remove = document.createElement("button");
+  remove.className = "danger-button";
+  remove.type = "button";
+  remove.textContent = "Delete Request";
+  remove.addEventListener("click", async () => {
+    if (!confirm(`Delete request from "${submission.name || "this person"}"?`)) return;
+    remove.disabled = true;
+    await api("/api/admin/submissions/delete", {
+      method: "POST",
+      body: JSON.stringify({ key: submission.key })
+    });
+    await loadSubmissions();
+  });
+
+  actions.append(reviewed, remove);
+  return actions;
 }
 
 async function initAdmin() {
@@ -307,7 +386,10 @@ $("[data-login-form]").addEventListener("submit", async (event) => {
 document.querySelectorAll("[data-save]").forEach((button) => button.addEventListener("click", async () => {
   setMessage("[data-save-message]", "Saving...");
   try {
-    await api("/api/admin/save", { method: "POST", body: JSON.stringify(draft) });
+    const result = await api("/api/admin/save", { method: "POST", body: JSON.stringify(draft) });
+    draft.meta ||= {};
+    draft.meta.lastSavedAt = result.lastSavedAt;
+    setLastSaved(result.lastSavedAt);
     setMessage("[data-save-message]", "Saved. Public site updated.");
   } catch (error) {
     setMessage("[data-save-message]", error.message);
