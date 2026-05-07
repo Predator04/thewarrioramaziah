@@ -4,6 +4,35 @@ function setText(selector, value) {
   });
 }
 
+function clear(element) {
+  while (element.firstChild) element.firstChild.remove();
+}
+
+function safeUrl(value, fallback = "#") {
+  const text = String(value || "").trim();
+  if (!text || text === "#") return fallback;
+  try {
+    const url = new URL(text, window.location.origin);
+    if (["http:", "https:", "mailto:", "tel:"].includes(url.protocol)) return url.href;
+  } catch (error) {
+    if (/^[\w./#-]+$/.test(text)) return text;
+  }
+  return fallback;
+}
+
+function safeImageSrc(value) {
+  const text = String(value || "").trim();
+  if (/^assets\/[\w./-]+\.(svg|png|jpe?g|webp)$/i.test(text)) return text;
+  if (/^data:image\/(png|jpe?g|webp);base64,/i.test(text)) return text;
+  try {
+    const url = new URL(text, window.location.origin);
+    if (["http:", "https:"].includes(url.protocol)) return url.href;
+  } catch (error) {
+    return "assets/warrior-poster.svg";
+  }
+  return "assets/warrior-poster.svg";
+}
+
 function renderProducts() {
   const grid = document.querySelector(".product-grid");
   if (!grid) return;
@@ -11,38 +40,60 @@ function renderProducts() {
   const limit = Number(grid.dataset.productsLimit || siteData.products.length);
   const products = siteData.products.slice(0, limit);
 
-  grid.innerHTML = products
-    .map(
-      (product) => `
-        <article class="product-card">
-          <img src="${product.image}" alt="${product.name}">
-          <div class="product-card-body">
-            <span>${product.status}</span>
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <dl>
-              <div><dt>Price</dt><dd>${product.price}</dd></div>
-              <div><dt>Colors</dt><dd>${product.colors}</dd></div>
-              <div><dt>Sizes</dt><dd>${product.sizes}</dd></div>
-            </dl>
-            ${
-              product.images
-                ? `<div class="view-switch" aria-label="${product.name} views">
-                    ${product.images
-                      .map(
-                        (image, index) =>
-                          `<button type="button" ${index === 0 ? 'aria-pressed="true"' : 'aria-pressed="false"'} data-image-src="${image.src}">${image.label}</button>`
-                      )
-                      .join("")}
-                  </div>`
-                : ""
-            }
-            <span class="preview-badge">Preview Only</span>
-          </div>
-        </article>
-      `
-    )
-    .join("");
+  clear(grid);
+  products.forEach((product) => {
+    const card = document.createElement("article");
+    card.className = "product-card";
+
+    const image = document.createElement("img");
+    image.src = safeImageSrc(product.image);
+    image.alt = product.name || "Fight kit item";
+
+    const body = document.createElement("div");
+    body.className = "product-card-body";
+    const status = document.createElement("span");
+    status.textContent = product.status || "";
+    const title = document.createElement("h3");
+    title.textContent = product.name || "";
+    const description = document.createElement("p");
+    description.textContent = product.description || "";
+    const details = document.createElement("dl");
+    [
+      ["Price", product.price],
+      ["Colors", product.colors],
+      ["Sizes", product.sizes]
+    ].forEach(([label, value]) => {
+      const row = document.createElement("div");
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const definition = document.createElement("dd");
+      definition.textContent = value || "";
+      row.append(term, definition);
+      details.append(row);
+    });
+
+    body.append(status, title, description, details);
+    if (product.images?.length) {
+      const switcher = document.createElement("div");
+      switcher.className = "view-switch";
+      switcher.setAttribute("aria-label", `${product.name || "Item"} views`);
+      product.images.forEach((item, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("aria-pressed", index === 0 ? "true" : "false");
+        button.dataset.imageSrc = safeImageSrc(item.src);
+        button.textContent = item.label || `View ${index + 1}`;
+        switcher.append(button);
+      });
+      body.append(switcher);
+    }
+    const badge = document.createElement("span");
+    badge.className = "preview-badge";
+    badge.textContent = "Preview Only";
+    body.append(badge);
+    card.append(image, body);
+    grid.append(card);
+  });
 
   grid.querySelectorAll(".view-switch button").forEach((button) => {
     button.addEventListener("click", () => {
@@ -59,40 +110,50 @@ function renderEvents() {
   const list = document.querySelector(".event-list");
   if (!list) return;
 
-  list.innerHTML = siteData.events
-    .map(
-      (event) => `
-        <article class="event-card">
-          <div>
-            <span class="event-type">${event.type}</span>
-            <h2>${event.title}</h2>
-            <p>${event.note}</p>
-          </div>
-          <div class="event-meta">
-            <span>${event.date}</span>
-            <span>${event.location}</span>
-            <a href="${event.url}">${event.linkLabel}</a>
-          </div>
-        </article>
-      `
-    )
-    .join("");
+  clear(list);
+  siteData.events.forEach((event) => {
+    const card = document.createElement("article");
+    card.className = "event-card";
+    const copy = document.createElement("div");
+    const type = document.createElement("span");
+    type.className = "event-type";
+    type.textContent = event.type || "";
+    const title = document.createElement("h2");
+    title.textContent = event.title || "";
+    const note = document.createElement("p");
+    note.textContent = event.note || "";
+    copy.append(type, title, note);
+
+    const meta = document.createElement("div");
+    meta.className = "event-meta";
+    [event.date, event.location].forEach((value) => {
+      const item = document.createElement("span");
+      item.textContent = value || "";
+      meta.append(item);
+    });
+    const link = document.createElement("a");
+    link.href = safeUrl(event.url);
+    link.textContent = event.linkLabel || "Details";
+    meta.append(link);
+    card.append(copy, meta);
+    list.append(card);
+  });
 }
 
 function renderStats() {
   const strip = document.querySelector("[data-stats]");
   if (!strip) return;
 
-  strip.innerHTML = siteData.stats
-    .map(
-      (stat) => `
-        <div>
-          <span>${stat.label}</span>
-          <strong>${stat.value}</strong>
-        </div>
-      `
-    )
-    .join("");
+  clear(strip);
+  siteData.stats.forEach((stat) => {
+    const item = document.createElement("div");
+    const label = document.createElement("span");
+    label.textContent = stat.label || "";
+    const value = document.createElement("strong");
+    value.textContent = stat.value || "";
+    item.append(label, value);
+    strip.append(item);
+  });
 }
 
 function renderCountdown() {
@@ -133,27 +194,37 @@ function renderMedia() {
   const grid = document.querySelector("[data-media]");
   if (!grid) return;
 
-  grid.innerHTML = siteData.media
-    .map(
-      (item) => `
-        <article class="media-card">
-          <img src="${item.image}" alt="${item.title}">
-          <div>
-            <span>${item.type}</span>
-            <h3>${item.title}</h3>
-          </div>
-        </article>
-      `
-    )
-    .join("");
+  clear(grid);
+  siteData.media.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "media-card";
+    const image = document.createElement("img");
+    image.src = safeImageSrc(item.image);
+    image.alt = item.title || "Media image";
+    const body = document.createElement("div");
+    const type = document.createElement("span");
+    type.textContent = item.type || "";
+    const title = document.createElement("h3");
+    title.textContent = item.title || "";
+    body.append(type, title);
+    card.append(image, body);
+    grid.append(card);
+  });
 }
 
 function renderSocials() {
   document.querySelectorAll("[data-socials]").forEach((container) => {
-    container.innerHTML = (siteData.socials || [])
+    clear(container);
+    (siteData.socials || [])
       .filter((social) => social.url && social.url !== "#")
-      .map((social) => `<a href="${social.url}" rel="noopener" target="_blank">${social.label}</a>`)
-      .join("");
+      .forEach((social) => {
+        const link = document.createElement("a");
+        link.href = safeUrl(social.url);
+        link.rel = "noopener";
+        link.target = "_blank";
+        link.textContent = social.label || "Social";
+        container.append(link);
+      });
   });
 }
 
