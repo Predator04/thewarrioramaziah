@@ -49,6 +49,8 @@ const helpText = {
   itemSizes: "Sizes or status. For fight kit, Team gear works well.",
   itemDescription: "Short description visitors read under the item name.",
   itemImage: "Main card image. Upload a photo or paste an image URL.",
+  itemBackImage: "Back view used by the Back toggle. Upload the back of the jacket/shorts here.",
+  itemFrontImage: "Front view used by the Front toggle. Upload the front of the jacket/shorts here.",
   mediaTitle: "Name shown under the media image.",
   mediaType: "Small label above the media title. Example: Training, Fight Kit, Fight Week.",
   mediaImage: "Gallery image. Upload a photo or paste an image URL."
@@ -110,6 +112,15 @@ function renderEventsEditor() {
   draft.events.forEach((event, index) => {
     const row = document.createElement("div");
     row.className = "admin-repeat";
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "danger-button full";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete This Event";
+    deleteButton.addEventListener("click", () => {
+      if (!confirm(`Delete event "${event.title}"?`)) return;
+      draft.events.splice(index, 1);
+      renderEventsEditor();
+    });
     row.append(
       Object.assign(document.createElement("h3"), { textContent: `Event ${index + 1}` }),
       field("Event Name", event.title, (value) => (event.title = value), "text", helpText.eventTitle),
@@ -119,7 +130,8 @@ function renderEventsEditor() {
       field("Location", event.location, (value) => (event.location = value), "text", helpText.eventLocation),
       field("Link Button Text", event.linkLabel, (value) => (event.linkLabel = value), "text", helpText.eventLinkLabel),
       field("Link URL", event.url, (value) => (event.url = value), "text", helpText.eventUrl),
-      field("Event Note", event.note, (value) => (event.note = value), "textarea", helpText.eventNote)
+      field("Event Note", event.note, (value) => (event.note = value), "textarea", helpText.eventNote),
+      deleteButton
     );
     root.append(row);
   });
@@ -130,8 +142,20 @@ function renderProductsEditor() {
   root.innerHTML = "";
   draft.products.forEach((product, index) => {
     product.images ||= [];
+    const backImage = product.images.find((image) => image.label === "Back") || product.images[0] || { label: "Back", src: product.image || "" };
+    const frontImage = product.images.find((image) => image.label === "Front") || product.images[1] || { label: "Front", src: "" };
+    product.images = [backImage, frontImage].filter((image) => image.src !== undefined);
     const row = document.createElement("div");
     row.className = "admin-repeat";
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "danger-button full";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete This Fight Kit Item";
+    deleteButton.addEventListener("click", () => {
+      if (!confirm(`Delete item "${product.name}"?`)) return;
+      draft.products.splice(index, 1);
+      renderProductsEditor();
+    });
     row.append(
       Object.assign(document.createElement("h3"), { textContent: `Item ${index + 1}` }),
       field("Item Name", product.name, (value) => (product.name = value), "text", helpText.itemName),
@@ -140,7 +164,17 @@ function renderProductsEditor() {
       field("Colors", product.colors, (value) => (product.colors = value), "text", helpText.itemColors),
       field("Sizes / Fit", product.sizes, (value) => (product.sizes = value), "text", helpText.itemSizes),
       field("Item Description", product.description, (value) => (product.description = value), "textarea", helpText.itemDescription),
-      imageField("Main Card Image", product.image, (value) => (product.image = value), helpText.itemImage)
+      imageField("Main Card Image", product.image, (value) => (product.image = value), helpText.itemImage),
+      imageField("Back Toggle Image", backImage.src, (value) => {
+        backImage.label = "Back";
+        backImage.src = value;
+        product.image ||= value;
+      }, helpText.itemBackImage),
+      imageField("Front Toggle Image", frontImage.src, (value) => {
+        frontImage.label = "Front";
+        frontImage.src = value;
+      }, helpText.itemFrontImage),
+      deleteButton
     );
     root.append(row);
   });
@@ -152,11 +186,21 @@ function renderMediaEditor() {
   draft.media.forEach((item, index) => {
     const row = document.createElement("div");
     row.className = "admin-repeat";
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "danger-button full";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete This Media Item";
+    deleteButton.addEventListener("click", () => {
+      if (!confirm(`Delete media "${item.title}"?`)) return;
+      draft.media.splice(index, 1);
+      renderMediaEditor();
+    });
     row.append(
       Object.assign(document.createElement("h3"), { textContent: `Media ${index + 1}` }),
       field("Media Title", item.title, (value) => (item.title = value), "text", helpText.mediaTitle),
       field("Media Type Label", item.type, (value) => (item.type = value), "text", helpText.mediaType),
-      imageField("Media Image", item.image, (value) => (item.image = value), helpText.mediaImage)
+      imageField("Media Image", item.image, (value) => (item.image = value), helpText.mediaImage),
+      deleteButton
     );
     root.append(row);
   });
@@ -208,6 +252,16 @@ document.querySelectorAll("[data-save]").forEach((button) => button.addEventList
     setMessage("[data-save-message]", error.message);
   }
 }));
+
+$("[data-export]").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(draft, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `warrior-amaziah-site-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+});
 
 $("[data-logout]").addEventListener("click", async () => {
   await api("/api/admin/logout", { method: "POST" });
