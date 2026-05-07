@@ -162,11 +162,22 @@ main {
   text-decoration: none;
 }
 
-.primary,
-.product-button {
+.primary {
   background: var(--purple);
   border-color: var(--purple);
   color: #07050d;
+}
+
+.preview-badge {
+  align-items: center;
+  background: rgba(143, 63, 252, 0.18);
+  border: 1px solid rgba(143, 63, 252, 0.55);
+  color: var(--text);
+  display: inline-flex;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 14px;
 }
 
 .ghost,

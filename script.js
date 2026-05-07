@@ -37,7 +37,7 @@ function renderProducts() {
                   </div>`
                 : ""
             }
-            <a class="button product-button" href="${product.buyUrl}">Preview Only</a>
+            <span class="preview-badge">Preview Only</span>
           </div>
         </article>
       `
