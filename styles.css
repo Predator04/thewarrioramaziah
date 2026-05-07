@@ -179,6 +179,14 @@ main {
   margin-top: 54px;
 }
 
+.section-note {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 12px 0 0;
+  max-width: 620px;
+}
+
 .section-intro h2,
 .split-band h2,
 .event-card h2 {

@@ -15,7 +15,7 @@ const siteData = {
       description: "Black and purple walkout jacket concept for fight night.",
       colors: "Black, purple",
       sizes: "Team gear",
-      image: "assets/shirt-purple.svg",
+      image: "assets/walkout-jacket-back.jpg",
       buyUrl: "#"
     },
     {
@@ -25,7 +25,7 @@ const siteData = {
       description: "Black and purple fight shorts concept with Amaziah details.",
       colors: "Black",
       sizes: "Team gear",
-      image: "assets/shirt-black.svg",
+      image: "assets/fight-shorts-back.jpg",
       buyUrl: "#"
     },
     {
