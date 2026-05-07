@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Purple and black fighter poster artwork</title>
+  <desc id="desc">A stylized boxing poster placeholder for a warrior fighter brand.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#090610"/>
+      <stop offset="0.58" stop-color="#271044"/>
+      <stop offset="1" stop-color="#050409"/>
+    </linearGradient>
+    <linearGradient id="glove" x1="0" x2="1">
+      <stop offset="0" stop-color="#8f3ffc"/>
+      <stop offset="1" stop-color="#c26bff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="900" height="1200" fill="url(#bg)"/>
+  <path d="M68 1040 792 160M144 1120 860 290" stroke="#8f3ffc" stroke-opacity=".2" stroke-width="42"/>
+  <path d="M0 890c170-80 278-92 415-38 146 57 248 36 485-138v486H0Z" fill="#08050d" opacity=".82"/>
+  <circle cx="455" cy="382" r="132" fill="#15101f"/>
+  <path d="M270 1030c30-272 52-420 94-512 36-78 143-84 189-7 58 99 81 259 108 519Z" fill="#111018"/>
+  <path d="M235 604c-89 38-137 107-156 211l134 34c16-75 55-113 119-131Z" fill="#14111d"/>
+  <path d="M632 714c75 18 115 58 135 135l132-39c-27-106-82-176-167-208Z" fill="#14111d"/>
+  <path d="M95 755c73-41 135-31 178 32 29 43 18 102-28 131-53 34-146 15-198-41-40-44-19-93 48-122Z" fill="url(#glove)" filter="url(#glow)"/>
+  <path d="M637 786c42-65 105-77 180-37 66 35 83 84 41 126-54 55-147 69-198 33-44-31-52-81-23-122Z" fill="url(#glove)" filter="url(#glow)"/>
+  <path d="M322 357c44 52 88 78 132 78 47 0 91-26 135-78-21 118-65 177-134 177-68 0-112-59-133-177Z" fill="#0a0810"/>
+  <path d="M300 270c112 69 219 69 322 0-30-64-84-102-162-114-81 11-134 49-160 114Z" fill="#100d17"/>
+  <text x="450" y="1010" fill="#f6f1ff" font-family="Arial Black, Arial, sans-serif" font-size="66" font-weight="900" text-anchor="middle">WARRIOR</text>
+  <text x="450" y="1072" fill="#fff06a" font-family="Arial, sans-serif" font-size="34" font-weight="900" text-anchor="middle">AMAZIAH</text>
+</svg>

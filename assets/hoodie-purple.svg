@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-labelledby="title">
+  <title id="title">Purple warrior hoodie mockup</title>
+  <rect width="900" height="900" fill="#08050d"/>
+  <path d="M306 210c22-72 74-108 144-108s122 36 144 108l94 54 84 432H128l84-432Z" fill="#231034" stroke="#8f3ffc" stroke-width="8"/>
+  <path d="M332 222c28 56 67 84 118 84s90-28 118-84c-22-48-61-72-118-72s-96 24-118 72Z" fill="#0d0715"/>
+  <path d="M330 610h240v110H330Z" fill="#120a1f" stroke="#c26bff" stroke-width="6"/>
+  <text x="450" y="506" fill="#f6f1ff" font-family="Arial Black, Arial, sans-serif" font-size="62" text-anchor="middle">WARRIOR</text>
+  <text x="450" y="560" fill="#fff06a" font-family="Arial, sans-serif" font-size="26" font-weight="900" text-anchor="middle">DROP PREVIEW</text>
+</svg>

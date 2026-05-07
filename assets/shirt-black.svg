@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-labelledby="title">
+  <title id="title">Black walkout tee mockup</title>
+  <rect width="900" height="900" fill="#120a1f"/>
+  <path d="M250 190 340 125h220l90 65 110 65-74 150-72-34v345H286V371l-72 34-74-150Z" fill="#07050d" stroke="#c26bff" stroke-width="8"/>
+  <path d="M376 364h148l-74 120Z" fill="#8f3ffc"/>
+  <text x="450" y="560" fill="#f6f1ff" font-family="Arial Black, Arial, sans-serif" font-size="58" text-anchor="middle">WALKOUT</text>
+</svg>
