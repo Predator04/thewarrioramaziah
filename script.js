@@ -25,12 +25,34 @@ function renderProducts() {
               <div><dt>Colors</dt><dd>${product.colors}</dd></div>
               <div><dt>Sizes</dt><dd>${product.sizes}</dd></div>
             </dl>
+            ${
+              product.images
+                ? `<div class="view-switch" aria-label="${product.name} views">
+                    ${product.images
+                      .map(
+                        (image, index) =>
+                          `<button type="button" ${index === 0 ? 'aria-pressed="true"' : 'aria-pressed="false"'} data-image-src="${image.src}">${image.label}</button>`
+                      )
+                      .join("")}
+                  </div>`
+                : ""
+            }
             <a class="button product-button" href="${product.buyUrl}">Preview Only</a>
           </div>
         </article>
       `
     )
     .join("");
+
+  grid.querySelectorAll(".view-switch button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const card = button.closest(".product-card");
+      const image = card.querySelector("img");
+      button.parentElement.querySelectorAll("button").forEach((item) => item.setAttribute("aria-pressed", "false"));
+      button.setAttribute("aria-pressed", "true");
+      image.src = button.dataset.imageSrc;
+    });
+  });
 }
 
 function renderEvents() {
@@ -50,6 +72,75 @@ function renderEvents() {
             <span>${event.date}</span>
             <span>${event.location}</span>
             <a href="${event.url}">${event.linkLabel}</a>
+          </div>
+        </article>
+      `
+    )
+    .join("");
+}
+
+function renderStats() {
+  const strip = document.querySelector("[data-stats]");
+  if (!strip) return;
+
+  strip.innerHTML = siteData.stats
+    .map(
+      (stat) => `
+        <div>
+          <span>${stat.label}</span>
+          <strong>${stat.value}</strong>
+        </div>
+      `
+    )
+    .join("");
+}
+
+function renderCountdown() {
+  const countdown = document.querySelector("[data-countdown]");
+  if (!countdown) return;
+
+  const event = siteData.events[0];
+  const target = event?.countdownDate ? new Date(event.countdownDate) : null;
+  if (!target || Number.isNaN(target.getTime())) {
+    countdown.innerHTML = `
+      <div><strong>TBA</strong><span>Days</span></div>
+      <div><strong>TBA</strong><span>Hours</span></div>
+      <div><strong>TBA</strong><span>Mins</span></div>
+      <div><strong>TBA</strong><span>Secs</span></div>
+    `;
+    return;
+  }
+
+  const update = () => {
+    const remaining = Math.max(0, target.getTime() - Date.now());
+    const days = Math.floor(remaining / 86400000);
+    const hours = Math.floor((remaining % 86400000) / 3600000);
+    const mins = Math.floor((remaining % 3600000) / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    countdown.innerHTML = `
+      <div><strong>${days}</strong><span>Days</span></div>
+      <div><strong>${hours}</strong><span>Hours</span></div>
+      <div><strong>${mins}</strong><span>Mins</span></div>
+      <div><strong>${secs}</strong><span>Secs</span></div>
+    `;
+  };
+
+  update();
+  setInterval(update, 1000);
+}
+
+function renderMedia() {
+  const grid = document.querySelector("[data-media]");
+  if (!grid) return;
+
+  grid.innerHTML = siteData.media
+    .map(
+      (item) => `
+        <article class="media-card">
+          <img src="${item.image}" alt="${item.title}">
+          <div>
+            <span>${item.type}</span>
+            <h3>${item.title}</h3>
           </div>
         </article>
       `
@@ -77,6 +168,9 @@ function renderSiteData() {
 
   renderProducts();
   renderEvents();
+  renderStats();
+  renderCountdown();
+  renderMedia();
 }
 
 document.addEventListener("DOMContentLoaded", renderSiteData);
