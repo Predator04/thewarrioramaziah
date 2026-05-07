@@ -25,7 +25,7 @@ function renderProducts() {
               <div><dt>Colors</dt><dd>${product.colors}</dd></div>
               <div><dt>Sizes</dt><dd>${product.sizes}</dd></div>
             </dl>
-            <a class="button product-button" href="${product.buyUrl}">Drop Details Soon</a>
+            <a class="button product-button" href="${product.buyUrl}">Preview Only</a>
           </div>
         </article>
       `
