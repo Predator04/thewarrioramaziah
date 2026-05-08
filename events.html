@@ -19,7 +19,6 @@
     <header class="site-header">
       <a class="brand" href="index.html" data-brand>The Warrior Amaziah</a>
       <nav aria-label="Primary navigation">
-        <a href="merch.html">Fight Kit</a>
         <a href="events.html" aria-current="page">Events</a>
         <a href="about.html">About</a>
         <a href="contact.html">Booking</a>
@@ -27,17 +26,21 @@
     </header>
 
     <main>
-      <section class="page-hero compact">
-        <p class="eyebrow">Fights + appearances</p>
-        <h1>Where the warrior shows up next.</h1>
-        <p>Use this page for fights, weigh-ins, pop-ups, signings, gyms, and merch appearances.</p>
-      </section>
-      <section class="countdown-band">
-        <div>
-          <p class="eyebrow">Next date</p>
-          <h2>Countdown ready.</h2>
-        </div>
+      <section class="fight-poster" aria-label="Next bell">
+        <span class="corner-tl" aria-hidden="true"></span>
+        <span class="corner-br" aria-hidden="true"></span>
+        <p class="eyebrow">Next Bell</p>
+        <h1 data-next-event-title>Columbia Appearance</h1>
+        <div class="rule"></div>
+        <div class="fight-poster-meta" data-fight-poster-meta></div>
         <div class="countdown" data-countdown aria-label="Countdown to next event"></div>
+        <a class="button primary" data-fight-poster-link href="#">Tickets When Live →</a>
+      </section>
+
+      <section class="section-intro">
+        <p class="eyebrow muted">Schedule</p>
+        <h2>Upcoming appearances.</h2>
+        <p class="section-note">Fights, weigh-ins, pop-ups, signings, gyms, and merch appearances all show up here.</p>
       </section>
       <section class="event-list" aria-label="Upcoming events"></section>
     </main>

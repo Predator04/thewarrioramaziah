@@ -212,6 +212,93 @@ function renderMedia() {
   });
 }
 
+function renderHeroMeta() {
+  const row = document.querySelector("[data-hero-meta]");
+  if (!row) return;
+  const meta = siteData.heroMeta || {};
+  const event = siteData.events[0] || {};
+
+  const items = [
+    { k: "Identity", v: meta.identity || "Faith-Driven", hot: false },
+    { k: "Next Stop", v: meta.nextStop || event.location || "TBA", hot: true },
+    { k: "Status", v: meta.status || "In Camp", hot: false }
+  ];
+
+  clear(row);
+  items.forEach((item) => {
+    const wrap = document.createElement("div");
+    wrap.className = "meta-item";
+    const k = document.createElement("span");
+    k.className = "k";
+    k.textContent = item.k;
+    const v = document.createElement("span");
+    v.className = "v" + (item.hot ? " hot" : "");
+    v.textContent = item.v;
+    wrap.append(k, v);
+    row.append(wrap);
+  });
+}
+
+function renderHeroFootplate() {
+  const fp = document.querySelector("[data-hero-footplate]");
+  if (!fp) return;
+  const event = siteData.events[0] || {};
+  const venueDate = [event.location, event.date].filter(Boolean).join(" · ") || "Date drops soon";
+  const ticketLabel = event.linkLabel || "Tickets";
+
+  clear(fp);
+  const left = document.createElement("strong");
+  left.textContent = venueDate;
+  const right = document.createElement("a");
+  right.href = safeUrl(event.url);
+  right.textContent = `${ticketLabel} →`;
+  fp.append(left, right);
+}
+
+function renderRecord() {
+  const card = document.querySelector("[data-record]");
+  if (!card) return;
+  const r = siteData.record || { wins: 0, losses: 0, draws: 0, kos: 0, status: "", note: "" };
+
+  const copy = card.querySelector("[data-record-copy]");
+  if (copy) {
+    const status = r.status || "Pro Debut TBA";
+    copy.innerHTML = `
+      <p class="eyebrow muted">Pro Record</p>
+      <h2><span>${r.wins}–${r.losses}–${r.draws}</span> · <span class="accent">${status}</span></h2>
+      <p>${r.note || ""}</p>
+    `;
+  }
+
+  const grid = card.querySelector("[data-record-grid]");
+  if (grid) {
+    grid.innerHTML = `
+      <div><strong>${r.wins}</strong><span>Wins</span></div>
+      <div><strong>${r.losses}</strong><span>Losses</span></div>
+      <div><strong>${r.draws}</strong><span>Draws</span></div>
+      <div class="hot"><strong>${r.kos}</strong><span>KO</span></div>
+    `;
+  }
+}
+
+function renderFightPosterMeta() {
+  const meta = document.querySelector("[data-fight-poster-meta]");
+  if (!meta) return;
+  const event = siteData.events[0] || {};
+
+  meta.innerHTML = `
+    <div><span class="k">Date</span><span class="v">${event.date || "TBA"}</span></div>
+    <div><span class="k">Venue</span><span class="v hot">${event.location || "TBA"}</span></div>
+    <div><span class="k">Status</span><span class="v">Date Drops Soon</span></div>
+  `;
+
+  const link = document.querySelector("[data-fight-poster-link]");
+  if (link) {
+    link.href = safeUrl(event.url);
+    link.textContent = `${event.linkLabel || "Tickets"} →`;
+  }
+}
+
 function renderSocials() {
   document.querySelectorAll("[data-socials]").forEach((container) => {
     clear(container);
@@ -307,6 +394,10 @@ async function renderSiteData() {
   renderCountdown();
   renderMedia();
   renderSocials();
+  renderHeroMeta();
+  renderHeroFootplate();
+  renderRecord();
+  renderFightPosterMeta();
   setupContactForm();
   setupPronunciation();
 }

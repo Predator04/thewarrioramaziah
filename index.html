@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>The Warrior Amaziah | Official Fighter Site</title>
-    <meta name="description" content="Official site for The Warrior Amaziah. Upcoming fights, appearances, fight kit previews, and booking.">
+    <meta name="description" content="Official site for The Warrior Amaziah. Upcoming fights, appearances, and booking.">
     <meta property="og:title" content="The Warrior Amaziah | Official Fighter Site">
-    <meta property="og:description" content="Follow The Warrior Amaziah for fights, appearances, fight kit previews, and booking.">
+    <meta property="og:description" content="Follow The Warrior Amaziah for fights, appearances, and booking.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://thewarrioramaziah.com/">
     <meta property="og:image" content="https://thewarrioramaziah.com/assets/walkout-jacket-back.jpg">
@@ -19,7 +19,6 @@
     <header class="site-header">
       <a class="brand" href="index.html" data-brand>The Warrior Amaziah</a>
       <nav aria-label="Primary navigation">
-        <a href="merch.html">Fight Kit</a>
         <a href="events.html">Events</a>
         <a href="about.html">About</a>
         <a href="contact.html">Booking</a>
@@ -31,6 +30,7 @@
         <div class="hero-copy">
           <p class="eyebrow">Official fighter site</p>
           <h1 data-hero-title>The warrior story starts before the bell.</h1>
+          <div class="rule"></div>
           <p data-hero-copy>
             A faith-driven boxer building his name through discipline, pressure, and the next fight ahead.
           </p>
@@ -38,16 +38,20 @@
             <a class="button primary" href="about.html">Meet the Fighter</a>
             <a class="button ghost" href="events.html">See Events</a>
           </div>
+          <div class="meta-row" data-hero-meta></div>
         </div>
         <div class="hero-media" aria-label="Stylized boxer poster placeholder">
+          <span class="corner-tl" aria-hidden="true"></span>
+          <span class="corner-br" aria-hidden="true"></span>
+          <span class="live-badge">Live Soon</span>
           <img src="assets/warrior-poster.svg" alt="Purple and black boxer poster artwork">
-          <span>Official photos will replace this before launch</span>
+          <span data-hero-footplate></span>
         </div>
       </section>
 
       <section class="story-band">
         <div>
-          <p class="eyebrow">About the fighter</p>
+          <p class="eyebrow muted">About the fighter</p>
           <h2>Built on faith. Tested under pressure.</h2>
         </div>
         <p>
@@ -56,19 +60,9 @@
         <a class="button secondary" href="about.html">Read His Story</a>
       </section>
 
-      <section class="proof-strip" aria-label="Fighter highlights">
-        <div>
-          <span>Identity</span>
-          <strong>Faith-driven boxer</strong>
-        </div>
-        <div>
-          <span>Next stop</span>
-          <strong>Columbia details soon</strong>
-        </div>
-        <div>
-          <span>Support</span>
-          <strong>Fight kit preview</strong>
-        </div>
+      <section class="record-card" data-record aria-label="Fight record">
+        <div data-record-copy></div>
+        <div class="record-grid" data-record-grid></div>
       </section>
 
       <section class="stats-strip" data-stats aria-label="Fighter stats"></section>
@@ -78,7 +72,7 @@
           <p class="eyebrow">Next appearance</p>
           <h2 data-next-event-title>Columbia appearance TBA</h2>
           <p data-next-event-copy>
-            Date and time are being finalized. Check back for tickets, pop-up details, and appearance updates.
+            Date and time are being finalized. Check back for tickets and pop-up details.
           </p>
         </div>
         <a class="button secondary" href="events.html">View Schedule</a>
@@ -93,14 +87,7 @@
       </section>
 
       <section class="section-intro">
-        <p class="eyebrow">Fight kit</p>
-        <h2>What he wears into the moment.</h2>
-        <p class="section-note">Preview gear only. Fan merch can be added when official products are ready.</p>
-      </section>
-      <section class="product-grid" data-products-limit="3" aria-label="Fight kit preview"></section>
-
-      <section class="section-intro">
-        <p class="eyebrow">Media</p>
+        <p class="eyebrow muted">Media</p>
         <h2>Training, kit, and fight week visuals.</h2>
         <p class="section-note">This will become his photo and video hub once real training and fight photos are ready.</p>
       </section>
@@ -108,13 +95,13 @@
 
       <section class="cta-grid" aria-label="Booking and updates">
         <article>
-          <p class="eyebrow">Sponsors</p>
+          <p class="eyebrow muted">Sponsors</p>
           <h2>Back the team before the next bell.</h2>
           <p>Use this space for local sponsors, fight-week partners, gyms, and brands that want to support Amaziah.</p>
           <a class="button primary" href="contact.html">Sponsor the Team</a>
         </article>
         <article>
-          <p class="eyebrow">Updates</p>
+          <p class="eyebrow muted">Updates</p>
           <h2>Fight alerts and team updates.</h2>
           <p>Newsletter or text signup can plug in here once the audience list is ready.</p>
           <form class="signup-form" action="#" aria-label="Fight updates signup">
@@ -122,6 +109,15 @@
             <button class="button secondary" type="submit">Join List</button>
           </form>
         </article>
+      </section>
+
+      <section class="bell-strip" aria-label="Next event reminder">
+        <div class="copy">
+          <p class="eyebrow muted">Stay Ringside</p>
+          <h2>Next bell. <span class="accent">Don't miss it.</span></h2>
+          <p>Schedule, venue, and tickets land here first.</p>
+        </div>
+        <a class="button primary" href="events.html">See Schedule →</a>
       </section>
     </main>
 
