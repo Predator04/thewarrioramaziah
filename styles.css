@@ -524,6 +524,35 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   justify-content: space-between;
 }
 
+.priority-event {
+  margin-top: 14px;
+}
+
+.fighter-quote {
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: grid;
+  gap: 12px;
+  margin-top: 26px;
+  padding: 26px 0;
+}
+
+.fighter-quote blockquote {
+  font-size: clamp(1.65rem, 4vw, 3.2rem);
+  font-weight: 860;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  margin: 0;
+  max-width: 980px;
+}
+
+.fighter-quote span {
+  color: var(--hot);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .story-band {
   align-items: end;
   display: grid;
