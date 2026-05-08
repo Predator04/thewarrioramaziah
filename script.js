@@ -47,7 +47,7 @@ function renderProducts() {
 
     const image = document.createElement("img");
     image.src = safeImageSrc(product.image);
-    image.alt = product.name || "Fight kit item";
+    image.alt = product.name || "Fight gear item";
 
     const body = document.createElement("div");
     body.className = "product-card-body";

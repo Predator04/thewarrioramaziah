@@ -50,17 +50,17 @@ const helpText = {
   eventLinkLabel: "Text on the event link. Example: Tickets, Details Soon, RSVP, or Watch Live.",
   eventUrl: "Where the event link goes. Use # if there is no link yet.",
   eventNote: "Short extra detail shown under the event title.",
-  itemName: "Name of this fight kit item.",
-  itemStatus: "Small label above the item name. Example: Fight Kit, Walkout Gear, or Fight Night.",
-  itemPrice: "Use Not for sale for fight kit.",
+  itemName: "Name of this fight gear item.",
+  itemStatus: "Small label above the item name. Example: Fight Gear, Walkout Gear, or Fight Night.",
+  itemPrice: "Use Not for sale for fight gear.",
   itemColors: "Colors shown on the card.",
-  itemSizes: "Sizes or status. For fight kit, Team gear works well.",
+  itemSizes: "Sizes or status. For fight gear, Team gear works well.",
   itemDescription: "Short description visitors read under the item name.",
   itemImage: "Main card image. Upload a photo or paste an image URL.",
   itemBackImage: "Back view used by the Back toggle. Upload the back of the jacket/shorts here.",
   itemFrontImage: "Front view used by the Front toggle. Upload the front of the jacket/shorts here.",
   mediaTitle: "Name shown under the media image.",
-  mediaType: "Small label above the media title. Example: Training, Fight Kit, Fight Week.",
+  mediaType: "Small label above the media title. Example: Training, Fight Gear, Fight Week.",
   mediaImage: "Gallery image. Upload a photo or paste an image URL."
 };
 
@@ -220,7 +220,7 @@ function renderProductsEditor() {
     const deleteButton = document.createElement("button");
     deleteButton.className = "danger-button full";
     deleteButton.type = "button";
-    deleteButton.textContent = "Delete This Fight Kit Item";
+    deleteButton.textContent = "Delete This Fight Gear Item";
     deleteButton.addEventListener("click", () => {
       if (!confirm(`Delete item "${product.name}"?`)) return;
       draft.products.splice(index, 1);

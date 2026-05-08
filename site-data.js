@@ -37,29 +37,29 @@ const siteData = {
   products: [
     {
       name: "Walkout Jacket",
-      status: "Fight kit",
+      status: "Fight gear",
       price: "Not for sale",
       description: "Black and purple walkout jacket concept for fight night.",
       colors: "Black, purple",
       sizes: "Team gear",
-      image: "assets/walkout-jacket-back.jpg",
+      image: "assets/walkout-jacket-back-transparent.png",
       images: [
-        { label: "Back", src: "assets/walkout-jacket-back.jpg" },
-        { label: "Front", src: "assets/walkout-jacket-front.jpg" }
+        { label: "Back", src: "assets/walkout-jacket-back-transparent.png" },
+        { label: "Front", src: "assets/walkout-jacket-front-transparent.png" }
       ],
       buyUrl: "#"
     },
     {
       name: "Fight Shorts",
-      status: "Fight kit",
+      status: "Fight gear",
       price: "Not for sale",
       description: "Black and purple fight shorts concept with Amaziah details.",
       colors: "Black",
       sizes: "Team gear",
-      image: "assets/fight-shorts-back.jpg",
+      image: "assets/fight-shorts-back-transparent.png",
       images: [
-        { label: "Back", src: "assets/fight-shorts-back.jpg" },
-        { label: "Front", src: "assets/fight-shorts-front.jpg" }
+        { label: "Back", src: "assets/fight-shorts-back-transparent.png" },
+        { label: "Front", src: "assets/fight-shorts-front-transparent.png" }
       ],
       buyUrl: "#"
     }
@@ -67,18 +67,18 @@ const siteData = {
   media: [
     {
       title: "Walkout Jacket",
-      type: "Fight kit",
-      image: "assets/walkout-jacket-front.jpg"
+      type: "Fight gear",
+      image: "assets/walkout-jacket-front-transparent.png"
     },
     {
       title: "Warrior Back Detail",
-      type: "Fight kit",
-      image: "assets/walkout-jacket-back.jpg"
+      type: "Fight gear",
+      image: "assets/walkout-jacket-back-transparent.png"
     },
     {
       title: "Amaziah Shorts",
-      type: "Fight kit",
-      image: "assets/fight-shorts-back.jpg"
+      type: "Fight gear",
+      image: "assets/fight-shorts-back-transparent.png"
     }
   ],
   events: [

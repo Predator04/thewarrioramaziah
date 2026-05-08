@@ -986,6 +986,7 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   padding: 30px 0;
 }
 
+.product-grid,
 .media-grid,
 .cta-grid {
   display: grid;
@@ -1042,6 +1043,7 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   color: #07050d;
   font-weight: 800;
 }
+.product-card,
 .media-card,
 .cta-grid article {
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
@@ -1050,20 +1052,38 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   overflow: hidden;
   transition: border-color 0.25s, transform 0.25s;
 }
+.product-card:hover,
 .media-card:hover,
 .cta-grid article:hover {
   border-color: rgba(143, 63, 252, 0.45);
   transform: translateY(-3px);
 }
+.product-card img,
 .media-card img {
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(143, 63, 252, 0.22), transparent 44%),
+    rgba(255,255,255,0.03);
+  object-fit: contain;
   width: 100%;
 }
+.product-card img {
+  aspect-ratio: 1 / 1;
+  padding: 18px;
+}
+.media-card img {
+  aspect-ratio: 4 / 3;
+  padding: 14px;
+}
+.product-card-body,
 .media-card div,
 .cta-grid article {
   padding: 20px;
 }
+.product-card-body {
+  display: grid;
+  gap: 12px;
+}
+.product-card span,
 .media-card span {
   color: var(--violet);
   display: block;
@@ -1073,12 +1093,18 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
+.product-card h3,
 .media-card h3 {
   font-family: var(--display);
   font-size: 1.4rem;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   line-height: 1.1;
+  margin: 0;
+}
+.product-card p {
+  color: var(--muted);
+  line-height: 1.55;
   margin: 0;
 }
 .cta-grid {
@@ -1237,6 +1263,7 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   .hero-media img,
   .about-layout img { min-height: 300px; }
   .proof-strip,
+  .product-grid,
   .featured-reel,
   .media-grid,
   .cta-grid,
