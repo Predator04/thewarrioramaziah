@@ -237,14 +237,6 @@ function setupContactForm() {
     const message = form.querySelector("[data-contact-message]");
     message.textContent = "Sending...";
     const data = Object.fromEntries(new FormData(form).entries());
-    if (form.dataset.interestForm !== undefined) {
-      const size = data.size || "No size selected";
-      const color = data.color || "No color selected";
-      data.type = "Merch Interest";
-      data.message = `Merch interest. Size: ${size}. Color: ${color}. Note: ${data.message || "No extra note."}`;
-      delete data.size;
-      delete data.color;
-    }
     try {
       const response = await fetch("/api/contact", {
         method: "POST",

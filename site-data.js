@@ -49,16 +49,6 @@ const siteData = {
         { label: "Front", src: "assets/fight-shorts-front.jpg" }
       ],
       buyUrl: "#"
-    },
-    {
-      name: "Future Fan Merch",
-      status: "Coming later",
-      price: "TBA",
-      description: "Fan shirts and hoodies can be added after the first official drop is ready.",
-      colors: "Purple, black",
-      sizes: "TBA",
-      image: "assets/hoodie-purple.svg",
-      buyUrl: "#"
     }
   ],
   media: [
