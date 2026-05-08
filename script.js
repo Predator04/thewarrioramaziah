@@ -261,6 +261,22 @@ function setupContactForm() {
   }));
 }
 
+function setupPronunciation() {
+  document.querySelectorAll("[data-pronounce-name]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!("speechSynthesis" in window)) {
+        button.textContent = "Audio Not Supported";
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(button.dataset.speakText || "Avishai Amaziah");
+      utterance.rate = 0.78;
+      utterance.pitch = 0.9;
+      window.speechSynthesis.speak(utterance);
+    });
+  });
+}
+
 async function loadEditableSiteData() {
   try {
     const response = await fetch("/api/site-data", { cache: "no-store" });
@@ -300,6 +316,7 @@ async function renderSiteData() {
   renderMedia();
   renderSocials();
   setupContactForm();
+  setupPronunciation();
 }
 
 document.addEventListener("DOMContentLoaded", renderSiteData);

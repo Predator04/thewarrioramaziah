@@ -473,6 +473,29 @@ dd {
   min-height: calc(100vh - 120px);
 }
 
+.bio-copy {
+  white-space: pre-line;
+}
+
+.pronunciation-card {
+  align-items: center;
+  border-left: 3px solid var(--purple);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+  padding-left: 14px;
+}
+
+.pronunciation-card span {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.pronunciation-card .button {
+  min-height: 42px;
+}
+
 .site-footer {
   border-top: 1px solid var(--line);
   color: var(--muted);
