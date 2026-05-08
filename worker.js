@@ -324,6 +324,12 @@ async function handleLogout() {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const forwardedProto = request.headers.get("x-forwarded-proto");
+    const visitor = request.headers.get("cf-visitor") || "";
+    if (url.protocol === "http:" || forwardedProto === "http" || visitor.includes('"scheme":"http"')) {
+      url.protocol = "https:";
+      return Response.redirect(url.toString(), 301);
+    }
 
     if (url.pathname === "/api/site-data") {
       return json(await getStoredData(env));
