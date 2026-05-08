@@ -993,6 +993,55 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 24px;
 }
+.featured-reel {
+  align-items: center;
+  background:
+    linear-gradient(90deg, rgba(143, 63, 252, 0.2), rgba(255,255,255,0.04)),
+    rgba(0,0,0,0.26);
+  border: 1px solid rgba(143, 63, 252, 0.28);
+  border-radius: 6px;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 0.78fr) minmax(300px, 0.62fr);
+  margin-top: 24px;
+  padding: 28px;
+}
+.featured-reel h2 {
+  font-family: var(--body);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin: 0;
+}
+.featured-reel p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 12px 0 18px;
+  max-width: 520px;
+}
+.reel-embed {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: grid;
+  justify-items: center;
+  min-height: 420px;
+  overflow: hidden;
+  padding: 10px;
+}
+.reel-embed .instagram-media {
+  background: #fff !important;
+  border: 0 !important;
+  margin: 0 auto !important;
+  max-width: 420px !important;
+  min-width: 280px !important;
+  width: 100% !important;
+}
+.reel-embed a {
+  color: #07050d;
+  font-weight: 800;
+}
 .media-card,
 .cta-grid article {
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
@@ -1188,6 +1237,7 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   .hero-media img,
   .about-layout img { min-height: 300px; }
   .proof-strip,
+  .featured-reel,
   .media-grid,
   .cta-grid,
   .signup-form,
