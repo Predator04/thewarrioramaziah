@@ -267,6 +267,9 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   position: relative;
   z-index: 0;
 }
+.hero-media img.fighter-poster-image {
+  object-position: center center;
+}
 .hero-media::after {
   content: '';
   position: absolute;

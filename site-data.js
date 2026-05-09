@@ -66,6 +66,11 @@ const siteData = {
   ],
   media: [
     {
+      title: "Amaziah Fight Poster",
+      type: "Fighter photo",
+      image: "assets/avishai-amaziah-poster.jpg"
+    },
+    {
       title: "Walkout Jacket",
       type: "Fight gear",
       image: "assets/walkout-jacket-front-transparent.png"
