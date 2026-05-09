@@ -13,17 +13,17 @@ const siteData = {
     { label: "YouTube", url: "#" }
   ],
   heroMeta: {
-    identity: "Heavyweight",
+    identity: "God's Own",
     nextStop: "Columbia",
     status: "Orthodox"
   },
   record: {
     wins: 0,
     losses: 0,
-    draws: 0,
+    draws: 1,
     kos: 0,
-    status: "Pro Debut TBA",
-    note: "Building. The first official fight gets logged here."
+    status: "Active Heavyweight",
+    note: "Official record updates here as new bouts are announced and completed."
   },
   aboutTitle: "Meet Avishai \"The Warrior\" Amaziah",
   aboutCopy:
