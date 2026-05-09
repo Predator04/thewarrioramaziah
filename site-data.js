@@ -68,20 +68,15 @@ const siteData = {
   ],
   media: [
     {
-      title: "Amaziah Fight Poster",
-      type: "Fighter photo",
-      image: "assets/avishai-amaziah-poster.jpg"
-    },
-    {
       title: "Amaziah Fight Clip",
       type: "Video",
-      image: "assets/avishai-amaziah-hero-natural.jpg",
+      image: "",
       video: "assets/amaziah.mp4"
     },
     {
       title: "Warrior Cartoon Edit",
       type: "Video",
-      image: "assets/avishai-amaziah-hero-natural.jpg",
+      image: "",
       video: "assets/amaziah-cartoon.mp4"
     },
     {

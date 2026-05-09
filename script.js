@@ -218,7 +218,7 @@ function renderMedia() {
       video.controls = true;
       video.preload = "metadata";
       video.playsInline = true;
-      video.poster = safeImageSrc(item.image);
+      if (item.image) video.poster = safeImageSrc(item.image);
       const source = document.createElement("source");
       source.src = videoSrc;
       source.type = videoSrc.toLowerCase().endsWith(".webm") ? "video/webm" : "video/mp4";
