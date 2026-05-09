@@ -71,6 +71,18 @@ const siteData = {
       image: "assets/avishai-amaziah-poster.jpg"
     },
     {
+      title: "Amaziah Fight Clip",
+      type: "Video",
+      image: "assets/avishai-amaziah-hero.jpg",
+      video: "assets/amaziah.mp4"
+    },
+    {
+      title: "Warrior Cartoon Edit",
+      type: "Video",
+      image: "assets/avishai-amaziah-hero.jpg",
+      video: "assets/amaziah-cartoon.mp4"
+    },
+    {
       title: "Walkout Jacket",
       type: "Fight gear",
       image: "assets/walkout-jacket-front-transparent.png"

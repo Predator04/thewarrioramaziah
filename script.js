@@ -33,6 +33,20 @@ function safeImageSrc(value) {
   return "assets/warrior-poster.svg";
 }
 
+function safeVideoSrc(value) {
+  const text = String(value || "").trim();
+  if (/^assets\/[\w./-]+\.(mp4|webm|mov)$/i.test(text)) return text;
+  try {
+    const url = new URL(text, window.location.origin);
+    if (["http:", "https:"].includes(url.protocol) && /\.(mp4|webm|mov)(\?.*)?$/i.test(url.pathname + url.search)) {
+      return url.href;
+    }
+  } catch (error) {
+    return "";
+  }
+  return "";
+}
+
 function renderProducts() {
   const grid = document.querySelector(".product-grid");
   if (!grid) return;
@@ -198,16 +212,31 @@ function renderMedia() {
   siteData.media.forEach((item) => {
     const card = document.createElement("article");
     card.className = "media-card";
-    const image = document.createElement("img");
-    image.src = safeImageSrc(item.image);
-    image.alt = item.title || "Media image";
+    const videoSrc = safeVideoSrc(item.video);
+    if (videoSrc) {
+      const video = document.createElement("video");
+      video.controls = true;
+      video.preload = "metadata";
+      video.playsInline = true;
+      video.poster = safeImageSrc(item.image);
+      const source = document.createElement("source");
+      source.src = videoSrc;
+      source.type = videoSrc.toLowerCase().endsWith(".webm") ? "video/webm" : "video/mp4";
+      video.append(source);
+      card.append(video);
+    } else {
+      const image = document.createElement("img");
+      image.src = safeImageSrc(item.image);
+      image.alt = item.title || "Media image";
+      card.append(image);
+    }
     const body = document.createElement("div");
     const type = document.createElement("span");
     type.textContent = item.type || "";
     const title = document.createElement("h3");
     title.textContent = item.title || "";
     body.append(type, title);
-    card.append(image, body);
+    card.append(body);
     grid.append(card);
   });
 }

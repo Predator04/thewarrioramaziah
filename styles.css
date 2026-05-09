@@ -1066,20 +1066,31 @@ body[data-page="contact"] main::before { content: 'BOOK'; }
   transform: translateY(-3px);
 }
 .product-card img,
-.media-card img {
+.media-card img,
+.media-card video {
   background:
     radial-gradient(circle at 50% 42%, rgba(143, 63, 252, 0.22), transparent 44%),
     rgba(255,255,255,0.03);
-  object-fit: contain;
   width: 100%;
+}
+.product-card img,
+.media-card img {
+  object-fit: contain;
 }
 .product-card img {
   aspect-ratio: 1 / 1;
   padding: 18px;
 }
-.media-card img {
+.media-card img,
+.media-card video {
   aspect-ratio: 4 / 3;
+}
+.media-card img {
   padding: 14px;
+}
+.media-card video {
+  display: block;
+  object-fit: cover;
 }
 .product-card-body,
 .media-card div,

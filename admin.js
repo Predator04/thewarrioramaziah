@@ -61,7 +61,8 @@ const helpText = {
   itemFrontImage: "Front view used by the Front toggle. Upload the front of the jacket/shorts here.",
   mediaTitle: "Name shown under the media image.",
   mediaType: "Small label above the media title. Example: Training, Fight Gear, Fight Week.",
-  mediaImage: "Gallery image. Upload a photo or paste an image URL."
+  mediaImage: "Gallery image or video poster. Upload a photo or paste an image URL.",
+  mediaVideo: "Optional video file path or direct MP4/WebM link. Leave blank for a normal photo card."
 };
 
 function field(label, value, onInput, type = "text", help = "") {
@@ -270,6 +271,7 @@ function renderMediaEditor() {
       field("Media Title", item.title, (value) => (item.title = value), "text", helpText.mediaTitle),
       field("Media Type Label", item.type, (value) => (item.type = value), "text", helpText.mediaType),
       imageField("Media Image", item.image, (value) => (item.image = value), helpText.mediaImage),
+      field("Optional Video File", item.video, (value) => (item.video = value), "text", helpText.mediaVideo),
       deleteButton
     );
     root.append(row);
@@ -473,7 +475,7 @@ $("[data-add-product]").addEventListener("click", () => {
 });
 
 $("[data-add-media]").addEventListener("click", () => {
-  draft.media.push({ title: "New Photo", type: "Media", image: "" });
+  draft.media.push({ title: "New Photo", type: "Media", image: "", video: "" });
   renderMediaEditor();
 });
 
