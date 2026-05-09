@@ -126,9 +126,10 @@
           <p class="eyebrow muted">Updates</p>
           <h2>Fight alerts and team updates.</h2>
           <p>Newsletter or text signup can plug in here once the audience list is ready.</p>
-          <form class="signup-form" action="#" aria-label="Fight updates signup">
-            <input type="email" placeholder="Email for updates" aria-label="Email for updates">
+          <form class="signup-form" aria-label="Fight updates signup" data-newsletter-form>
+            <input name="email" type="email" placeholder="Email for updates" aria-label="Email for updates" required>
             <button class="button secondary" type="submit">Join List</button>
+            <p class="form-message" data-newsletter-message></p>
           </form>
         </article>
       </section>

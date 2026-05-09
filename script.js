@@ -369,6 +369,31 @@ function setupContactForm() {
   }));
 }
 
+function setupNewsletterForm() {
+  const forms = document.querySelectorAll("[data-newsletter-form]");
+  if (!forms.length) return;
+
+  forms.forEach((form) => form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const message = form.querySelector("[data-newsletter-message]");
+    message.textContent = "Joining...";
+    const data = Object.fromEntries(new FormData(form).entries());
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: data.email, source: document.body.dataset.page || "homepage" })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not join list.");
+      form.reset();
+      message.textContent = "You're on the list.";
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  }));
+}
+
 function setupPronunciation() {
   document.querySelectorAll("[data-pronounce-name]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -428,6 +453,7 @@ async function renderSiteData() {
   renderRecord();
   renderFightPosterMeta();
   setupContactForm();
+  setupNewsletterForm();
   setupPronunciation();
 }
 

@@ -319,6 +319,68 @@ async function loadSubmissions() {
   }
 }
 
+let newsletterSubscribers = [];
+
+async function loadNewsletter() {
+  const root = $("[data-newsletter-list]");
+  if (!root) return;
+  root.textContent = "Loading email list...";
+  try {
+    const result = await api("/api/admin/newsletter");
+    newsletterSubscribers = result.subscribers || [];
+    if (!newsletterSubscribers.length) {
+      root.textContent = "No email signups yet.";
+      return;
+    }
+    root.innerHTML = "";
+    newsletterSubscribers.forEach((subscriber) => {
+      const row = document.createElement("div");
+      row.className = "admin-repeat";
+      row.append(
+        Object.assign(document.createElement("h3"), { textContent: subscriber.email || "No email" }),
+        Object.assign(document.createElement("time"), { textContent: new Date(subscriber.createdAt).toLocaleString() }),
+        field("Source", subscriber.source || "", () => {}),
+        newsletterActions(subscriber)
+      );
+      root.append(row);
+    });
+  } catch (error) {
+    root.textContent = error.message;
+  }
+}
+
+function newsletterActions(subscriber) {
+  const actions = document.createElement("div");
+  actions.className = "admin-actions full";
+  const remove = document.createElement("button");
+  remove.className = "danger-button";
+  remove.type = "button";
+  remove.textContent = "Delete Email";
+  remove.addEventListener("click", async () => {
+    if (!confirm(`Delete "${subscriber.email}" from the email list?`)) return;
+    remove.disabled = true;
+    await api("/api/admin/newsletter/delete", {
+      method: "POST",
+      body: JSON.stringify({ key: subscriber.key })
+    });
+    await loadNewsletter();
+  });
+  actions.append(remove);
+  return actions;
+}
+
+function exportNewsletterCsv() {
+  const headers = ["email", "source", "createdAt"];
+  const rows = newsletterSubscribers.map((subscriber) => headers.map((key) => `"${String(subscriber[key] || "").replaceAll('"', '""')}"`).join(","));
+  const blob = new Blob([[headers.join(","), ...rows].join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "warrior-email-list.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 async function loadDraft() {
   const saved = await api("/api/site-data");
   draft = saved || clone(siteData);
@@ -368,6 +430,7 @@ async function initAdmin() {
     $("[data-admin]").hidden = false;
     await loadDraft();
     await loadSubmissions();
+    await loadNewsletter();
   }
 }
 
@@ -439,6 +502,8 @@ $("[data-restore-previous]").addEventListener("click", async () => {
 });
 
 $("[data-refresh-submissions]").addEventListener("click", loadSubmissions);
+$("[data-refresh-newsletter]").addEventListener("click", loadNewsletter);
+$("[data-export-newsletter]").addEventListener("click", exportNewsletterCsv);
 
 $("[data-change-password]").addEventListener("click", async () => {
   const input = $("[data-new-password]");

@@ -27,6 +27,7 @@ const starterLeads = [
 let leads = [];
 let selectedId = "";
 let activeTemplate = "email";
+let senderEmail = "yeshayaamaziah@gmail.com";
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -152,15 +153,17 @@ function messageFor(lead) {
   const contact = lead.contact || "there";
   const business = lead.business || "your business";
   const categoryLine = lead.category && lead.category !== "Other" ? `I thought of ${business} because local ${lead.category.toLowerCase()} businesses are a strong fit for his audience and fight-week content.` : `I thought ${business} could be a strong fit for his audience and fight-week content.`;
+  const senderLine = `Send from: ${senderEmail}`;
+  const optOut = `If this is not a fit, reply "no thanks" and I will not follow up again.`;
   const base = `Avishai "The Warrior" Amaziah is a 6'5" heavyweight fighting out of Las Vegas with a faith, family, and discipline story. Official fight sponsor spots are $1,500 per fight and include website placement, fight-week recognition, social media shoutouts, and content your business can repost.\n\nSponsor page: ${SPONSOR_LINK}`;
 
   if (activeTemplate === "dm") {
-    return `Hey ${contact}, I am helping Avishai "The Warrior" Amaziah connect with a few local fight sponsors.\n\n${categoryLine}\n\n${base}\n\nWould you be open to seeing the sponsor info?`;
+    return `${senderLine}\n\nHey ${contact}, I am helping Avishai "The Warrior" Amaziah connect with a few local fight sponsors.\n\n${categoryLine}\n\n${base}\n\nWould you be open to seeing the sponsor info?\n\n${optOut}`;
   }
   if (activeTemplate === "followup") {
-    return `Hey ${contact}, just wanted to follow up on the Avishai Amaziah fight sponsor info.\n\nWe are keeping it simple: $1,500 per fight for official sponsor visibility, website placement, social shoutouts, and fight-week content the business can repost.\n\nHere is the sponsor page again: ${SPONSOR_LINK}\n\nWould you like to talk through it this week?`;
+    return `${senderLine}\n\nHey ${contact}, just wanted to follow up on the Avishai Amaziah fight sponsor info.\n\nWe are keeping it simple: $1,500 per fight for official sponsor visibility, website placement, social shoutouts, and fight-week content the business can repost.\n\nHere is the sponsor page again: ${SPONSOR_LINK}\n\nWould you like to talk through it this week?\n\n${optOut}`;
   }
-  return `Subject: Fight sponsorship opportunity with Avishai "The Warrior" Amaziah\n\nHey ${contact},\n\nI am helping Avishai "The Warrior" Amaziah build sponsor support for his next fight camp. ${categoryLine}\n\n${base}\n\nWould you be open to seeing the sponsor options or talking through whether this is a fit for ${business}?\n\nThank you.`;
+  return `${senderLine}\n\nSubject: Fight sponsorship opportunity with Avishai "The Warrior" Amaziah\n\nHey ${contact},\n\nI am helping Avishai "The Warrior" Amaziah build sponsor support for his next fight camp. ${categoryLine}\n\n${base}\n\nWould you be open to seeing the sponsor options or talking through whether this is a fit for ${business}?\n\n${optOut}\n\nThank you.`;
 }
 
 function renderMessage() {
@@ -315,6 +318,10 @@ function bindEvents() {
   });
   $("[data-copy-sponsor-link]").addEventListener("click", () => copyText(SPONSOR_LINK));
   $("[data-copy-message]").addEventListener("click", () => copyText($("[data-message]").value));
+  $("[data-sender]").addEventListener("change", (event) => {
+    senderEmail = event.target.value;
+    renderMessage();
+  });
   $("[data-mark-contacted]").addEventListener("click", () => {
     const lead = leads.find((item) => item.id === selectedId);
     if (!lead) return;

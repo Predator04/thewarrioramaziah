@@ -2,6 +2,7 @@ const DATA_KEY = "site-data";
 const PREVIOUS_DATA_KEY = "site-data:previous";
 const PASSWORD_KEY = "admin-password";
 const SUBMISSION_PREFIX = "submission:";
+const NEWSLETTER_PREFIX = "newsletter:";
 const RATE_PREFIX = "rate:";
 const SESSION_COOKIE = "warrior_admin";
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
@@ -230,6 +231,49 @@ async function handleContact(request, env) {
   return json({ ok: true });
 }
 
+async function handleNewsletter(request, env) {
+  const limited = await rateLimit(request, env, "newsletter", 6, 600);
+  if (limited) return limited;
+
+  const body = await request.json().catch(() => ({}));
+  const email = String(body.email || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Use a valid email address." }, { status: 400 });
+
+  const keyEmail = email.replace(/[^a-z0-9@._+-]/gi, "");
+  const subscriber = {
+    id: randomToken(12),
+    createdAt: new Date().toISOString(),
+    email,
+    source: String(body.source || "homepage").slice(0, 80),
+    active: true
+  };
+  await env.SITE_KV.put(`${NEWSLETTER_PREFIX}${keyEmail}`, JSON.stringify(subscriber));
+  return json({ ok: true });
+}
+
+async function handleNewsletterList(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const list = await env.SITE_KV.list({ prefix: NEWSLETTER_PREFIX, limit: 1000 });
+  const subscribers = await Promise.all(
+    list.keys.map(async (key) => ({ ...((await env.SITE_KV.get(key.name, "json")) || {}), key: key.name }))
+  );
+  subscribers.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  return json({ subscribers });
+}
+
+async function handleNewsletterDelete(request, env) {
+  const auth = await requireAuth(request, env);
+  if (auth) return auth;
+
+  const body = await request.json().catch(() => ({}));
+  const key = String(body.key || "");
+  if (!key.startsWith(NEWSLETTER_PREFIX)) return json({ error: "Missing subscriber key." }, { status: 400 });
+  await env.SITE_KV.delete(key);
+  return json({ ok: true });
+}
+
 async function handleSubmissions(request, env) {
   const auth = await requireAuth(request, env);
   if (auth) return auth;
@@ -348,7 +392,10 @@ export default {
     if (url.pathname === "/api/admin/submissions") return handleSubmissions(request, env);
     if (url.pathname === "/api/admin/submissions/update" && request.method === "POST") return handleSubmissionUpdate(request, env);
     if (url.pathname === "/api/admin/submissions/delete" && request.method === "POST") return handleSubmissionDelete(request, env);
+    if (url.pathname === "/api/admin/newsletter") return handleNewsletterList(request, env);
+    if (url.pathname === "/api/admin/newsletter/delete" && request.method === "POST") return handleNewsletterDelete(request, env);
     if (url.pathname === "/api/contact" && request.method === "POST") return handleContact(request, env);
+    if (url.pathname === "/api/newsletter" && request.method === "POST") return handleNewsletter(request, env);
 
     if (url.pathname === "/admin") {
       return env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
