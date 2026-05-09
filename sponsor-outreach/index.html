@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Warrior Sponsor Outreach</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">The Warrior Amaziah</p>
+        <h1>Sponsor Outreach</h1>
+      </div>
+      <div class="header-actions">
+        <button class="button ghost" type="button" data-export>Export CSV</button>
+        <label class="button ghost file-button">
+          Import CSV
+          <input type="file" accept=".csv,text/csv" data-import>
+        </label>
+        <button class="button primary" type="button" data-open-form>Add Lead</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-panel">
+        <div>
+          <p class="eyebrow">Official sponsor offer</p>
+          <h2>$1,500 per fight</h2>
+          <p>
+            Track Las Vegas businesses, create personal outreach messages, and move each lead from first contact to closed sponsor.
+          </p>
+        </div>
+        <div class="quick-copy">
+          <span>Sponsor page</span>
+          <strong>thewarrioramaziah.com/sponsors.html</strong>
+          <button class="button secondary" type="button" data-copy-sponsor-link>Copy Link</button>
+        </div>
+      </section>
+
+      <section class="stats-grid" data-stats></section>
+
+      <section class="toolbar" aria-label="Lead controls">
+        <label>
+          Search
+          <input type="search" data-search placeholder="Business, contact, notes...">
+        </label>
+        <label>
+          Category
+          <select data-category-filter>
+            <option value="">All categories</option>
+          </select>
+        </label>
+        <label>
+          Status
+          <select data-status-filter>
+            <option value="">All statuses</option>
+          </select>
+        </label>
+        <button class="button ghost" type="button" data-seed>Load Starter Ideas</button>
+      </section>
+
+      <section class="workspace">
+        <section class="pipeline" data-board aria-label="Sponsor pipeline"></section>
+
+        <aside class="message-panel">
+          <p class="eyebrow">Message Builder</p>
+          <h2 data-message-title>Pick a lead</h2>
+          <p class="panel-note">Select a lead to generate a sponsor email, DM, or follow-up message.</p>
+          <div class="segmented" role="group" aria-label="Message type">
+            <button type="button" data-template="email" aria-pressed="true">Email</button>
+            <button type="button" data-template="dm" aria-pressed="false">DM</button>
+            <button type="button" data-template="followup" aria-pressed="false">Follow Up</button>
+          </div>
+          <textarea data-message readonly></textarea>
+          <div class="panel-actions">
+            <button class="button primary" type="button" data-copy-message>Copy Message</button>
+            <button class="button ghost" type="button" data-mark-contacted>Mark Contacted</button>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <dialog data-lead-dialog>
+      <form method="dialog" class="lead-form" data-lead-form>
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Sponsor lead</p>
+            <h2 data-form-title>Add Lead</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Close" type="submit">X</button>
+        </div>
+
+        <input type="hidden" name="id">
+        <label>Business Name<input name="business" required></label>
+        <label>Category
+          <select name="category" required></select>
+        </label>
+        <label>Contact Name<input name="contact" placeholder="Owner, manager, or DM name"></label>
+        <label>Email<input name="email" type="email"></label>
+        <label>Phone<input name="phone"></label>
+        <label>Instagram<input name="instagram" placeholder="@business or full link"></label>
+        <label>Status
+          <select name="status" required></select>
+        </label>
+        <label>Sponsor Amount<input name="amount" value="$1,500"></label>
+        <label>Follow-up Date<input name="followUp" type="date"></label>
+        <label class="wide">Notes<textarea name="notes" placeholder="Why they fit, who knows them, what to mention..."></textarea></label>
+
+        <div class="form-actions">
+          <button class="button ghost" type="button" data-delete-lead>Delete</button>
+          <button class="button primary" value="default" type="submit">Save Lead</button>
+        </div>
+      </form>
+    </dialog>
+
+    <template data-card-template>
+      <article class="lead-card">
+        <div class="card-top">
+          <span data-card-category></span>
+          <button type="button" data-edit>Edit</button>
+        </div>
+        <h3 data-card-business></h3>
+        <p data-card-contact></p>
+        <div class="lead-meta">
+          <span data-card-amount></span>
+          <span data-card-followup></span>
+        </div>
+        <div class="card-actions">
+          <button type="button" data-message-button>Message</button>
+          <button type="button" data-prev>Back</button>
+          <button type="button" data-next>Next</button>
+        </div>
+      </article>
+    </template>
+  </body>
+</html>
