@@ -13,7 +13,7 @@ const siteData = {
     { label: "YouTube", url: "#" }
   ],
   heroMeta: {
-    identity: "God's Own",
+    identity: "Heavyweight",
     nextStop: "Columbia",
     status: "Orthodox"
   },
