@@ -6,7 +6,7 @@ const siteData = {
   tagline: "The warrior story starts before the bell.",
   heroCopy:
     "A faith-driven boxer building his name through discipline, pressure, and the next fight ahead.",
-  bookingEmail: "booking@example.com",
+  bookingEmail: "booking@thewarrioramaziah.com",
   socials: [
     { label: "Instagram", url: "#" },
     { label: "TikTok", url: "#" },
