@@ -16,4 +16,8 @@
     <loc>https://thewarrioramaziah.com/contact.html</loc>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>https://thewarrioramaziah.com/sponsors.html</loc>
+    <priority>0.7</priority>
+  </url>
 </urlset>
