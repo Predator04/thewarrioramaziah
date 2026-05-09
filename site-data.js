@@ -73,13 +73,13 @@ const siteData = {
     {
       title: "Amaziah Fight Clip",
       type: "Video",
-      image: "assets/avishai-amaziah-hero-clear.jpg",
+      image: "assets/avishai-amaziah-hero-natural.jpg",
       video: "assets/amaziah.mp4"
     },
     {
       title: "Warrior Cartoon Edit",
       type: "Video",
-      image: "assets/avishai-amaziah-hero-clear.jpg",
+      image: "assets/avishai-amaziah-hero-natural.jpg",
       video: "assets/amaziah-cartoon.mp4"
     },
     {
