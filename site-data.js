@@ -68,6 +68,12 @@ const siteData = {
   ],
   media: [
     {
+      title: "Latest Training Clip",
+      type: "Video",
+      image: "",
+      video: "assets/amaziah-training-2026-05-09.mp4"
+    },
+    {
       title: "Amaziah Fight Clip",
       type: "Video",
       image: "",
