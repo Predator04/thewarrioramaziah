@@ -44,6 +44,28 @@ body::before {
 a { color: inherit; }
 img { display: block; max-width: 100%; }
 
+:focus-visible {
+  outline: 3px solid var(--hot);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  background: var(--hot);
+  color: #07050d;
+  font-weight: 900;
+  left: 16px;
+  padding: 10px 14px;
+  position: fixed;
+  top: 12px;
+  transform: translateY(-160%);
+  transition: transform 0.2s;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 .site-header,
 .site-footer {
   align-items: center;
@@ -1042,7 +1064,7 @@ body[data-page="sponsors"] main::before { content: 'SPONSOR'; }
 }
 .media-card video {
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 .product-card-body,
 .media-card div,
@@ -1126,7 +1148,6 @@ body[data-page="sponsors"] main::before { content: 'SPONSOR'; }
 .contact-form input:focus,
 .contact-form select:focus,
 .contact-form textarea:focus {
-  outline: none;
   border-color: var(--violet);
   background: rgba(0, 0, 0, 0.45);
 }
@@ -1149,6 +1170,17 @@ body[data-page="sponsors"] main::before { content: 'SPONSOR'; }
   font-weight: 700;
   font-size: 0.9rem;
   letter-spacing: 0.04em;
+}
+.form-fallback {
+  color: var(--muted);
+  font-size: 0.92rem;
+  grid-column: 1 / -1;
+  line-height: 1.5;
+  margin: 0;
+}
+.form-fallback a {
+  color: var(--hot);
+  font-weight: 800;
 }
 .signup-form {
   display: grid;

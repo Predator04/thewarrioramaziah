@@ -308,7 +308,9 @@ async function loadSubmissions() {
           textContent: submission.reviewed ? "Reviewed" : "Needs review"
         }),
         Object.assign(document.createElement("time"), { textContent: new Date(submission.createdAt).toLocaleString() }),
+        field("Business", submission.business || "", () => {}),
         field("Email", submission.email || "", () => {}),
+        field("Phone", submission.phone || "", () => {}),
         field("Message", submission.message || "", () => {}, "textarea"),
         requestActions(submission)
       );

@@ -47,6 +47,29 @@ function safeVideoSrc(value) {
   return "";
 }
 
+function appendStatBlock(parent, value, label, className = "") {
+  const block = document.createElement("div");
+  if (className) block.className = className;
+  const strong = document.createElement("strong");
+  strong.textContent = value;
+  const span = document.createElement("span");
+  span.textContent = label;
+  block.append(strong, span);
+  parent.append(block);
+}
+
+function appendPosterMeta(parent, label, value, hot = false) {
+  const block = document.createElement("div");
+  const key = document.createElement("span");
+  key.className = "k";
+  key.textContent = label;
+  const val = document.createElement("span");
+  val.className = "v" + (hot ? " hot" : "");
+  val.textContent = value;
+  block.append(key, val);
+  parent.append(block);
+}
+
 function renderProducts() {
   const grid = document.querySelector(".product-grid");
   if (!grid) return;
@@ -279,8 +302,8 @@ function renderHeroFootplate() {
   const left = document.createElement("strong");
   left.textContent = venueDate;
   const right = document.createElement("a");
-  right.href = safeUrl(event.url);
-  right.textContent = `${ticketLabel} →`;
+  right.href = event.url && event.url !== "#" ? safeUrl(event.url) : "contact.html";
+  right.textContent = `${event.url && event.url !== "#" ? ticketLabel : "Get Alerts"} ->`;
   fp.append(left, right);
 }
 
@@ -292,21 +315,30 @@ function renderRecord() {
   const copy = card.querySelector("[data-record-copy]");
   if (copy) {
     const status = r.status || "Pro Debut TBA";
-    copy.innerHTML = `
-      <p class="eyebrow muted">Pro Record</p>
-      <h2><span>${r.wins}–${r.losses}–${r.draws}</span> · <span class="accent">${status}</span></h2>
-      <p>${r.note || ""}</p>
-    `;
+    clear(copy);
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "eyebrow muted";
+    eyebrow.textContent = "Pro Record";
+    const heading = document.createElement("h2");
+    const recordText = document.createElement("span");
+    recordText.textContent = `${r.wins}-${r.losses}-${r.draws}`;
+    const separator = document.createTextNode(" - ");
+    const statusText = document.createElement("span");
+    statusText.className = "accent";
+    statusText.textContent = status;
+    heading.append(recordText, separator, statusText);
+    const note = document.createElement("p");
+    note.textContent = r.note || "";
+    copy.append(eyebrow, heading, note);
   }
 
   const grid = card.querySelector("[data-record-grid]");
   if (grid) {
-    grid.innerHTML = `
-      <div><strong>${r.wins}</strong><span>Wins</span></div>
-      <div><strong>${r.losses}</strong><span>Losses</span></div>
-      <div><strong>${r.draws}</strong><span>Draws</span></div>
-      <div class="hot"><strong>${r.kos}</strong><span>KO</span></div>
-    `;
+    clear(grid);
+    appendStatBlock(grid, r.wins, "Wins");
+    appendStatBlock(grid, r.losses, "Losses");
+    appendStatBlock(grid, r.draws, "Draws");
+    appendStatBlock(grid, r.kos, "KO", "hot");
   }
 }
 
@@ -315,16 +347,15 @@ function renderFightPosterMeta() {
   if (!meta) return;
   const event = siteData.events[0] || {};
 
-  meta.innerHTML = `
-    <div><span class="k">Date</span><span class="v">${event.date || "TBA"}</span></div>
-    <div><span class="k">Venue</span><span class="v hot">${event.location || "TBA"}</span></div>
-    <div><span class="k">Status</span><span class="v">Date Drops Soon</span></div>
-  `;
+  clear(meta);
+  appendPosterMeta(meta, "Date", event.date || "TBA");
+  appendPosterMeta(meta, "Venue", event.location || "TBA", true);
+  appendPosterMeta(meta, "Status", event.countdownDate ? "Announced" : "Date Drops Soon");
 
   const link = document.querySelector("[data-fight-poster-link]");
   if (link) {
-    link.href = safeUrl(event.url);
-    link.textContent = `${event.linkLabel || "Tickets"} →`;
+    link.href = event.url && event.url !== "#" ? safeUrl(event.url) : "contact.html";
+    link.textContent = `${event.url && event.url !== "#" ? event.linkLabel || "Tickets" : "Get Event Alerts"} ->`;
   }
 }
 
@@ -431,10 +462,9 @@ async function renderSiteData() {
   setText("[data-about-title]", siteData.aboutTitle);
   setText("[data-about-copy]", siteData.aboutCopy);
 
-  const bookingLink = document.querySelector("[data-booking-link]");
-  if (bookingLink) {
+  document.querySelectorAll("[data-booking-link]").forEach((bookingLink) => {
     bookingLink.href = `mailto:${siteData.bookingEmail}`;
-  }
+  });
 
   const nextEvent = siteData.events[0];
   if (nextEvent) {

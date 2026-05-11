@@ -16,6 +16,7 @@
     <script src="script.js" defer></script>
   </head>
   <body data-page="contact">
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
       <a class="brand" href="index.html" data-brand>The Warrior Amaziah</a>
       <nav aria-label="Primary navigation">
@@ -27,12 +28,12 @@
       </nav>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="page-hero contact-panel">
         <p class="eyebrow">Book Avishai</p>
         <h1>Bring Avishai to the next card, pop-up, or brand moment.</h1>
         <p>One request form for appearances, sponsorships, media, and fight-week opportunities.</p>
-        <a class="button primary" data-booking-link href="mailto:booking@example.com">Email Booking</a>
+        <a class="button primary" data-booking-link href="mailto:booking@thewarrioramaziah.com">Email Booking</a>
       </section>
 
       <section class="cta-grid" aria-label="Contact options">
@@ -40,7 +41,7 @@
           <p class="eyebrow muted">Media</p>
           <h2>Press, photos, and interviews.</h2>
           <p>Use this for fight-week media, gym visits, local features, and interview requests.</p>
-          <a class="button secondary" data-booking-link href="mailto:booking@example.com">Media Request</a>
+          <a class="button secondary" data-booking-link href="mailto:booking@thewarrioramaziah.com">Media Request</a>
         </article>
         <article>
           <p class="eyebrow muted">Sponsors</p>
@@ -56,6 +57,7 @@
         <form class="contact-form" data-contact-form>
           <label>Name<input name="name" autocomplete="name" required></label>
           <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>Phone<input name="phone" type="tel" autocomplete="tel"></label>
           <label>Request Type
             <select name="type">
               <option>Booking</option>

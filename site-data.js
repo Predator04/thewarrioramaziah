@@ -109,8 +109,8 @@ const siteData = {
       countdownDate: "",
       location: "Columbia",
       note: "Time, venue, and ticket details are being finalized.",
-      linkLabel: "Details soon",
-      url: "#"
+      linkLabel: "Get Event Alerts",
+      url: "contact.html"
     }
   ]
 };

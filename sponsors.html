@@ -16,6 +16,7 @@
     <script src="script.js" defer></script>
   </head>
   <body data-page="sponsors">
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
       <a class="brand" href="index.html" data-brand>The Warrior Amaziah</a>
       <nav aria-label="Primary navigation">
@@ -27,7 +28,7 @@
       </nav>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="sponsor-hero">
         <div>
           <p class="eyebrow">Official fight sponsor</p>
@@ -86,7 +87,9 @@
         <h2 class="form-title">Tell us about your business.</h2>
         <form class="contact-form" data-contact-form>
           <label>Name<input name="name" autocomplete="name" required></label>
+          <label>Business Name<input name="business" autocomplete="organization"></label>
           <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>Phone<input name="phone" type="tel" autocomplete="tel"></label>
           <label>Request Type
             <select name="type">
               <option selected>Sponsorship</option>
@@ -95,8 +98,9 @@
               <option>Other</option>
             </select>
           </label>
-          <label>Message<textarea name="message" required placeholder="Business name, best phone number, and anything you want to know about the $1,500 per fight sponsor spot."></textarea></label>
+          <label>Message<textarea name="message" required placeholder="Tell us what kind of sponsor support you are interested in and the best time to follow up."></textarea></label>
           <button class="button primary" type="submit">Send Sponsor Inquiry</button>
+          <p class="form-fallback">Prefer email? Reach the team at <a data-booking-link href="mailto:booking@thewarrioramaziah.com">booking@thewarrioramaziah.com</a>.</p>
           <p class="form-message" data-contact-message></p>
         </form>
       </section>

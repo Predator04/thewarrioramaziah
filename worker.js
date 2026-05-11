@@ -6,6 +6,32 @@ const NEWSLETTER_PREFIX = "newsletter:";
 const RATE_PREFIX = "rate:";
 const SESSION_COOKIE = "warrior_admin";
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
+const MAX_JSON_BYTES = 120000;
+
+const SECURITY_HEADERS = {
+  "content-security-policy":
+    "default-src 'self'; img-src 'self' data: https:; media-src 'self' https:; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "x-content-type-options": "nosniff",
+  "permissions-policy": "camera=(), microphone=(), geolocation=()"
+};
+
+function securityHeaders(extra = {}) {
+  return {
+    ...SECURITY_HEADERS,
+    ...extra
+  };
+}
+
+function withSecurityHeaders(response, extra = {}) {
+  const headers = new Headers(response.headers);
+  Object.entries(securityHeaders(extra)).forEach(([key, value]) => headers.set(key, value));
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
 
 function json(data, init = {}) {
   return new Response(JSON.stringify(data), {
@@ -13,7 +39,7 @@ function json(data, init = {}) {
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
-      ...(init.headers || {})
+      ...securityHeaders(init.headers || {})
     }
   });
 }
@@ -24,9 +50,17 @@ function text(data, init = {}) {
     headers: {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": "no-store",
-      ...(init.headers || {})
+      ...securityHeaders(init.headers || {})
     }
   });
+}
+
+async function readJson(request, maxBytes = MAX_JSON_BYTES) {
+  const length = Number(request.headers.get("content-length") || 0);
+  if (length && length > maxBytes) throw new Error("Request body is too large.");
+  const raw = await request.text();
+  if (raw.length > maxBytes) throw new Error("Request body is too large.");
+  return JSON.parse(raw || "{}");
 }
 
 function parseCookies(request) {
@@ -70,13 +104,18 @@ async function signSession(payload, secret) {
 }
 
 async function verifySession(token, secret) {
+  if (!secret || secret.length < 32) return false;
   if (!token || !token.includes(".")) return false;
-  const [body, signature] = token.split(".");
-  const key = await importHmacKey(secret);
-  const valid = await crypto.subtle.verify("HMAC", key, bytesFromBase64Url(signature), new TextEncoder().encode(body));
-  if (!valid) return false;
-  const payload = JSON.parse(new TextDecoder().decode(bytesFromBase64Url(body)));
-  return payload.exp && payload.exp > Math.floor(Date.now() / 1000);
+  try {
+    const [body, signature] = token.split(".");
+    const key = await importHmacKey(secret);
+    const valid = await crypto.subtle.verify("HMAC", key, bytesFromBase64Url(signature), new TextEncoder().encode(body));
+    if (!valid) return false;
+    const payload = JSON.parse(new TextDecoder().decode(bytesFromBase64Url(body)));
+    return payload.exp && payload.exp > Math.floor(Date.now() / 1000);
+  } catch (error) {
+    return false;
+  }
 }
 
 async function sha256(value) {
@@ -137,10 +176,13 @@ async function rateLimit(request, env, bucket, limit, windowSeconds) {
 }
 
 async function handleLogin(request, env) {
+  if (!env.ADMIN_SESSION_SECRET || env.ADMIN_SESSION_SECRET.length < 32) {
+    return json({ error: "Admin session secret is not configured." }, { status: 503 });
+  }
   const limited = await rateLimit(request, env, "login", 12, 300);
   if (limited) return limited;
 
-  const body = await request.json().catch(() => ({}));
+  const body = await readJson(request, 2000).catch(() => ({}));
   if (!body.password || !(await passwordMatches(body.password, env))) {
     return json({ error: "Invalid password" }, { status: 401 });
   }
@@ -167,7 +209,7 @@ async function handleChangePassword(request, env) {
   const auth = await requireAuth(request, env);
   if (auth) return auth;
 
-  const body = await request.json().catch(() => ({}));
+  const body = await readJson(request, 4000).catch(() => ({}));
   const password = String(body.password || "");
   if (password.length < 10) return json({ error: "Use at least 10 characters." }, { status: 400 });
   const salt = randomToken();
@@ -208,10 +250,13 @@ async function handleContact(request, env) {
   const limited = await rateLimit(request, env, "contact", 8, 600);
   if (limited) return limited;
 
-  const body = await request.json().catch(() => ({}));
-  const name = String(body.name || "").trim();
-  const email = String(body.email || "").trim();
-  const type = String(body.type || "Other").trim();
+  const body = await readJson(request, 8000).catch(() => ({}));
+  const name = String(body.name || "").trim().slice(0, 120);
+  const business = String(body.business || "").trim().slice(0, 160);
+  const email = String(body.email || "").trim().slice(0, 254);
+  const phone = String(body.phone || "").trim().slice(0, 40);
+  const allowedTypes = new Set(["Booking", "Sponsorship", "Media", "Other"]);
+  const type = allowedTypes.has(String(body.type || "")) ? String(body.type) : "Other";
   const message = String(body.message || "").trim();
 
   if (!name || !email || !message) return json({ error: "Name, email, and message are required." }, { status: 400 });
@@ -222,7 +267,9 @@ async function handleContact(request, env) {
     id: randomToken(12),
     createdAt: new Date().toISOString(),
     name,
+    business,
     email,
+    phone,
     type,
     message,
     reviewed: false
@@ -235,8 +282,8 @@ async function handleNewsletter(request, env) {
   const limited = await rateLimit(request, env, "newsletter", 6, 600);
   if (limited) return limited;
 
-  const body = await request.json().catch(() => ({}));
-  const email = String(body.email || "").trim().toLowerCase();
+  const body = await readJson(request, 2000).catch(() => ({}));
+  const email = String(body.email || "").trim().toLowerCase().slice(0, 254);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Use a valid email address." }, { status: 400 });
 
   const keyEmail = email.replace(/[^a-z0-9@._+-]/gi, "");
@@ -267,7 +314,7 @@ async function handleNewsletterDelete(request, env) {
   const auth = await requireAuth(request, env);
   if (auth) return auth;
 
-  const body = await request.json().catch(() => ({}));
+  const body = await readJson(request, 2000).catch(() => ({}));
   const key = String(body.key || "");
   if (!key.startsWith(NEWSLETTER_PREFIX)) return json({ error: "Missing subscriber key." }, { status: 400 });
   await env.SITE_KV.delete(key);
@@ -290,7 +337,7 @@ async function handleSubmissionUpdate(request, env) {
   const auth = await requireAuth(request, env);
   if (auth) return auth;
 
-  const body = await request.json().catch(() => ({}));
+  const body = await readJson(request, 2000).catch(() => ({}));
   const key = String(body.key || "");
   if (!key.startsWith(SUBMISSION_PREFIX)) return json({ error: "Missing request key." }, { status: 400 });
 
@@ -307,7 +354,7 @@ async function handleSubmissionDelete(request, env) {
   const auth = await requireAuth(request, env);
   if (auth) return auth;
 
-  const body = await request.json().catch(() => ({}));
+  const body = await readJson(request, 2000).catch(() => ({}));
   const key = String(body.key || "");
   if (!key.startsWith(SUBMISSION_PREFIX)) return json({ error: "Missing request key." }, { status: 400 });
   await env.SITE_KV.delete(key);
@@ -318,7 +365,7 @@ async function handleSave(request, env) {
   const auth = await requireAuth(request, env);
   if (auth) return auth;
 
-  const data = await request.json().catch(() => null);
+  const data = await readJson(request, 8000000).catch(() => null);
   const validationError = validateData(data);
   if (validationError) return json({ error: validationError }, { status: 400 });
 
@@ -365,6 +412,15 @@ async function handleLogout() {
   );
 }
 
+function hasValidAdminRequestOrigin(request) {
+  if (request.method !== "POST") return true;
+  const origin = request.headers.get("origin");
+  const fetchSite = request.headers.get("sec-fetch-site");
+  const requestOrigin = new URL(request.url).origin;
+  if (fetchSite && !["same-origin", "none"].includes(fetchSite)) return false;
+  return !origin || origin === requestOrigin;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -383,6 +439,10 @@ export default {
       return json({ authenticated: await isAuthed(request, env) });
     }
 
+    if (url.pathname.startsWith("/api/admin/") && !hasValidAdminRequestOrigin(request)) {
+      return json({ error: "Invalid request origin." }, { status: 403 });
+    }
+
     if (url.pathname === "/api/admin/login" && request.method === "POST") return handleLogin(request, env);
     if (url.pathname === "/api/admin/logout" && request.method === "POST") return handleLogout();
     if (url.pathname === "/api/admin/save" && request.method === "POST") return handleSave(request, env);
@@ -397,13 +457,35 @@ export default {
     if (url.pathname === "/api/contact" && request.method === "POST") return handleContact(request, env);
     if (url.pathname === "/api/newsletter" && request.method === "POST") return handleNewsletter(request, env);
 
+    if (["/worker.js", "/wrangler.jsonc", "/design-explorations.html"].includes(url.pathname)) {
+      return text("Not found", { status: 404 });
+    }
+
     if (url.pathname === "/admin") {
-      return env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
+      return withSecurityHeaders(await env.ASSETS.fetch(new Request(new URL("/admin.html", url), request)), {
+        "x-robots-tag": "noindex"
+      });
+    }
+
+    const pageRoutes = {
+      "/": "/index.html",
+      "/about": "/about.html",
+      "/events": "/events.html",
+      "/contact": "/contact.html",
+      "/sponsors": "/sponsors.html",
+      "/merch": "/merch.html"
+    };
+    const pageAsset = pageRoutes[url.pathname];
+    if (pageAsset) {
+      return withSecurityHeaders(await env.ASSETS.fetch(new Request(new URL(pageAsset, url), request)));
     }
 
     const response = await env.ASSETS.fetch(request);
-    if (response.status !== 404) return response;
+    if (response.status !== 404) {
+      const extra = url.pathname === "/admin" || url.pathname === "/admin.html" ? { "x-robots-tag": "noindex" } : {};
+      return withSecurityHeaders(response, extra);
+    }
     const notFound = await env.ASSETS.fetch(new Request(new URL("/404.html", url), request));
-    return new Response(notFound.body, { status: 404, headers: notFound.headers });
+    return withSecurityHeaders(new Response(notFound.body, { status: 404, headers: notFound.headers }));
   }
 };
