@@ -140,6 +140,18 @@ nav a[aria-current="page"] {
 
 .social-links { display: flex; flex-wrap: wrap; gap: 18px; }
 
+.text-link {
+  color: var(--hot);
+  display: inline-flex;
+  font-weight: 800;
+  margin-top: 10px;
+  text-decoration: none;
+}
+
+.text-link:hover {
+  color: var(--text);
+}
+
 main {
   margin: 0 auto;
   max-width: 1180px;

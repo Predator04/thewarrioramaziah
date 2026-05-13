@@ -85,6 +85,8 @@ function renderProducts() {
     const image = document.createElement("img");
     image.src = safeImageSrc(product.image);
     image.alt = product.name || "Fight gear item";
+    image.loading = "lazy";
+    image.decoding = "async";
 
     const body = document.createElement("div");
     body.className = "product-card-body";
@@ -251,6 +253,8 @@ function renderMedia() {
       const image = document.createElement("img");
       image.src = safeImageSrc(item.image);
       image.alt = item.title || "Media image";
+      image.loading = "lazy";
+      image.decoding = "async";
       card.append(image);
     }
     const body = document.createElement("div");
