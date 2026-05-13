@@ -1321,6 +1321,35 @@ body[data-page="sponsors"] main::before { content: 'SPONSOR'; }
   line-height: 1.55;
   margin: 0;
 }
+.sponsor-faq {
+  margin-top: 44px;
+}
+.compact-copy {
+  max-width: 780px;
+}
+.faq-list {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 18px;
+}
+.faq-list article {
+  background: rgba(0, 0, 0, 0.26);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 20px;
+}
+.faq-list h3 {
+  font-family: var(--body);
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+.faq-list p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+}
 .form-title {
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   letter-spacing: -0.02em;
@@ -1392,6 +1421,7 @@ body[data-page="sponsors"] main::before { content: 'SPONSOR'; }
   .product-grid,
   .media-grid,
   .sponsor-grid,
+  .faq-list,
   .cta-grid,
   .signup-form,
   .contact-form { grid-template-columns: 1fr; }

@@ -2,26 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://thewarrioramaziah.com/</loc>
+    <lastmod>2026-05-13</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://thewarrioramaziah.com/about.html</loc>
+    <lastmod>2026-05-13</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://thewarrioramaziah.com/events.html</loc>
+    <lastmod>2026-05-13</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://thewarrioramaziah.com/contact.html</loc>
+    <lastmod>2026-05-13</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://thewarrioramaziah.com/sponsors.html</loc>
+    <lastmod>2026-05-13</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://thewarrioramaziah.com/merch.html</loc>
+    <lastmod>2026-05-13</lastmod>
     <priority>0.5</priority>
   </url>
 </urlset>

@@ -10,7 +10,7 @@ const MAX_JSON_BYTES = 120000;
 
 const SECURITY_HEADERS = {
   "content-security-policy":
-    "default-src 'self'; img-src 'self' data: https:; media-src 'self' https:; script-src 'self' https://static.cloudflareinsights.com 'sha256-1rVSW4NCo5rh7JoTgN01vMNUQo2gWo6BLdeK/nsNrO0=' 'sha256-8OqXexpz4A18Di125dGF5ksS2mNIb62ZZ7obywXYQ7U=' 'sha256-RDu2VifMPsC8mgHZ0t591PTj91jmzL6ZjXBmM4c7SjE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+    "default-src 'self'; img-src 'self' data: https:; media-src 'self' https:; script-src 'self' https://static.cloudflareinsights.com 'sha256-1rVSW4NCo5rh7JoTgN01vMNUQo2gWo6BLdeK/nsNrO0=' 'sha256-8OqXexpz4A18Di125dGF5ksS2mNIb62ZZ7obywXYQ7U=' 'sha256-RDu2VifMPsC8mgHZ0t591PTj91jmzL6ZjXBmM4c7SjE=' 'sha256-CRGjzKoJTL4406xY3v+o7Q7OSTT3LWnJIbxwl3uFNZc='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
   "referrer-policy": "strict-origin-when-cross-origin",
   "x-content-type-options": "nosniff",
   "permissions-policy": "camera=(), microphone=(), geolocation=()"
