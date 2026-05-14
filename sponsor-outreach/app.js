@@ -295,6 +295,7 @@ function addGooglePlace(index) {
   selectedId = lead.id;
   saveLeads();
   render();
+  renderGoogleResults();
   setGoogleStatus(`Added ${lead.business}.`);
 }
 
@@ -304,8 +305,11 @@ function renderGoogleResults() {
   if (!googleResults.length) return;
 
   googleResults.forEach((place, index) => {
+    const lead = placeToLead(place);
+    const alreadyAdded = isDuplicateLead(lead);
     const card = document.createElement("article");
     card.className = "google-result";
+    card.classList.toggle("added", alreadyAdded);
     const copy = document.createElement("div");
     const title = document.createElement("h3");
     title.textContent = place.displayName?.text || "Unnamed business";
@@ -330,8 +334,8 @@ function renderGoogleResults() {
     const button = document.createElement("button");
     button.className = "button secondary";
     button.type = "button";
-    button.textContent = isDuplicateLead(placeToLead(place)) ? "Already Added" : "Add Lead";
-    button.disabled = isDuplicateLead(placeToLead(place));
+    button.textContent = alreadyAdded ? "Added to Leads" : "Add Lead";
+    button.disabled = alreadyAdded;
     button.addEventListener("click", () => addGooglePlace(index));
 
     card.append(copy, button);

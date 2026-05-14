@@ -236,6 +236,24 @@ main {
   grid-template-columns: minmax(0, 1fr) auto;
   padding: 14px;
 }
+.google-result.added {
+  border-color: rgba(112, 242, 164, 0.48);
+  opacity: 0.74;
+}
+.google-result.added h3::after {
+  color: var(--good);
+  content: " Added";
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-left: 8px;
+  text-transform: uppercase;
+}
+.google-result button:disabled {
+  background: rgba(112, 242, 164, 0.14);
+  color: var(--good);
+  cursor: default;
+}
 .google-result h3 {
   font-size: 1rem;
   margin: 0 0 6px;
