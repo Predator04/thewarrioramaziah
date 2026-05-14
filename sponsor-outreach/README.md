@@ -2,7 +2,7 @@
 
 Local sponsor outreach tracker for Avishai "The Warrior" Amaziah.
 
-Open `index.html` in a browser to use it. The app stores sponsor leads in the browser using `localStorage`, so export CSV regularly as a backup.
+Double-click `Start Sponsor Outreach.bat` to open it, or open `index.html` in a browser. The app stores sponsor leads in the browser using `localStorage`, so export CSV regularly as a backup.
 
 ## What it does
 
