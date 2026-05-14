@@ -1,4 +1,5 @@
 const STORAGE_KEY = "warriorSponsorLeads";
+const GOOGLE_KEY_STORAGE = "warriorGooglePlacesKey";
 const SPONSOR_LINK = "https://thewarrioramaziah.com/sponsors.html";
 
 const statuses = ["New", "Contacted", "Interested", "Follow Up", "Closed"];
@@ -28,6 +29,7 @@ let leads = [];
 let selectedId = "";
 let activeTemplate = "email";
 let senderEmail = "yeshayaamaziah@gmail.com";
+let googleResults = [];
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -185,6 +187,7 @@ function populateSelects() {
   $("[name='status']").innerHTML = statusOptions;
   $("[data-category-filter]").insertAdjacentHTML("beforeend", categoryOptions);
   $("[data-status-filter]").insertAdjacentHTML("beforeend", statusOptions);
+  $("[data-google-category]").innerHTML = categoryOptions;
 }
 
 function openLeadForm(id = "") {
@@ -234,6 +237,156 @@ function deleteSelectedLead() {
 
 function copyText(text) {
   navigator.clipboard.writeText(text);
+}
+
+function setGoogleStatus(message, isError = false) {
+  const status = $("[data-google-status]");
+  status.textContent = message;
+  status.style.color = isError ? "var(--danger)" : "var(--muted)";
+}
+
+function placeToLead(place) {
+  const name = place.displayName?.text || "";
+  const mapsUrl = place.googleMapsUri || "";
+  const website = place.websiteUri || "";
+  const rating = place.rating ? `${place.rating} stars` : "";
+  const reviews = place.userRatingCount ? `${place.userRatingCount} reviews` : "";
+  const category = $("[data-google-category]").value || "Other";
+  const details = [
+    place.formattedAddress,
+    website ? `Website: ${website}` : "",
+    mapsUrl ? `Google Maps: ${mapsUrl}` : "",
+    [rating, reviews].filter(Boolean).join(", ")
+  ].filter(Boolean);
+
+  return normalizeLead({
+    business: name,
+    category,
+    contact: "Owner / Manager",
+    email: "",
+    phone: place.nationalPhoneNumber || "",
+    instagram: "",
+    status: "New",
+    amount: "$1,500",
+    followUp: "",
+    notes: `Found through Google Places. ${details.join(" | ")}`
+  });
+}
+
+function isDuplicateLead(candidate) {
+  const business = candidate.business.trim().toLowerCase();
+  const phone = candidate.phone.replace(/\D/g, "");
+  return leads.some((lead) => {
+    const sameBusiness = lead.business.trim().toLowerCase() === business;
+    const samePhone = phone && lead.phone.replace(/\D/g, "") === phone;
+    return sameBusiness || samePhone;
+  });
+}
+
+function addGooglePlace(index) {
+  const place = googleResults[index];
+  if (!place) return;
+  const lead = placeToLead(place);
+  if (isDuplicateLead(lead)) {
+    setGoogleStatus(`${lead.business} is already in your list.`, true);
+    return;
+  }
+  leads.unshift(lead);
+  selectedId = lead.id;
+  saveLeads();
+  render();
+  setGoogleStatus(`Added ${lead.business}.`);
+}
+
+function renderGoogleResults() {
+  const root = $("[data-google-results]");
+  root.textContent = "";
+  if (!googleResults.length) return;
+
+  googleResults.forEach((place, index) => {
+    const card = document.createElement("article");
+    card.className = "google-result";
+    const copy = document.createElement("div");
+    const title = document.createElement("h3");
+    title.textContent = place.displayName?.text || "Unnamed business";
+    const address = document.createElement("small");
+    address.textContent = place.formattedAddress || "No address returned";
+    const meta = document.createElement("small");
+    meta.textContent = [
+      place.nationalPhoneNumber || "",
+      place.rating ? `${place.rating} stars` : "",
+      place.userRatingCount ? `${place.userRatingCount} reviews` : ""
+    ].filter(Boolean).join(" | ");
+    copy.append(title, address, meta);
+    if (place.googleMapsUri) {
+      const link = document.createElement("a");
+      link.href = place.googleMapsUri;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "View on Google Maps";
+      copy.append(link);
+    }
+
+    const button = document.createElement("button");
+    button.className = "button secondary";
+    button.type = "button";
+    button.textContent = isDuplicateLead(placeToLead(place)) ? "Already Added" : "Add Lead";
+    button.disabled = isDuplicateLead(placeToLead(place));
+    button.addEventListener("click", () => addGooglePlace(index));
+
+    card.append(copy, button);
+    root.append(card);
+  });
+}
+
+async function searchGooglePlaces() {
+  const keyInput = $("[data-google-key]");
+  const key = keyInput.value.trim();
+  const query = $("[data-google-query]").value.trim();
+  const location = $("[data-google-location]").value.trim() || "Las Vegas, Nevada";
+
+  if (!key) {
+    setGoogleStatus("Paste a Google Places API key first.", true);
+    return;
+  }
+  if (!query) {
+    setGoogleStatus("Enter a business type to search.", true);
+    return;
+  }
+
+  localStorage.setItem(GOOGLE_KEY_STORAGE, key);
+  setGoogleStatus("Searching Google Places...");
+  googleResults = [];
+  renderGoogleResults();
+
+  try {
+    const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-goog-api-key": key,
+        "x-goog-fieldmask": "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri,places.rating,places.userRatingCount,places.types"
+      },
+      body: JSON.stringify({
+        textQuery: `${query} in ${location}`,
+        maxResultCount: 12
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || "Google Places search failed.");
+    googleResults = data.places || [];
+    renderGoogleResults();
+    setGoogleStatus(googleResults.length ? `Found ${googleResults.length} businesses.` : "No businesses found. Try a broader search.");
+  } catch (error) {
+    setGoogleStatus(error.message, true);
+  }
+}
+
+function openGoogleMapsSearch() {
+  const query = $("[data-google-query]").value.trim() || "local business";
+  const location = $("[data-google-location]").value.trim() || "Las Vegas, Nevada";
+  const url = `https://www.google.com/maps/search/${encodeURIComponent(`${query} in ${location}`)}`;
+  window.open(url, "_blank", "noopener");
 }
 
 function csvEscape(value) {
@@ -317,6 +470,12 @@ function bindEvents() {
     render();
   });
   $("[data-copy-sponsor-link]").addEventListener("click", () => copyText(SPONSOR_LINK));
+  $("[data-google-key]").value = localStorage.getItem(GOOGLE_KEY_STORAGE) || "";
+  $("[data-google-key]").addEventListener("change", (event) => {
+    localStorage.setItem(GOOGLE_KEY_STORAGE, event.target.value.trim());
+  });
+  $("[data-google-search]").addEventListener("click", searchGooglePlaces);
+  $("[data-google-open-maps]").addEventListener("click", openGoogleMapsSearch);
   $("[data-copy-message]").addEventListener("click", () => copyText($("[data-message]").value));
   $("[data-sender]").addEventListener("change", (event) => {
     senderEmail = event.target.value;

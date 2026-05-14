@@ -41,6 +41,40 @@
 
       <section class="stats-grid" data-stats></section>
 
+      <section class="google-panel" aria-label="Google local business finder">
+        <div>
+          <p class="eyebrow">Google business finder</p>
+          <h2>Find local businesses to contact.</h2>
+          <p>
+            Search Google Places for Las Vegas businesses, review the matches, and add good fits straight into the sponsor pipeline.
+          </p>
+        </div>
+        <div class="google-form">
+          <label class="wide">
+            Google Places API Key
+            <input type="password" data-google-key placeholder="Paste API key here. Saved only in this browser.">
+          </label>
+          <label>
+            Business Type
+            <input data-google-query value="barbershop" placeholder="barbershop, gym, restaurant...">
+          </label>
+          <label>
+            Area
+            <input data-google-location value="Las Vegas, Nevada" placeholder="Las Vegas, Henderson, Summerlin...">
+          </label>
+          <label>
+            Add As Category
+            <select data-google-category></select>
+          </label>
+          <div class="google-actions wide">
+            <button class="button primary" type="button" data-google-search>Search Google</button>
+            <button class="button ghost" type="button" data-google-open-maps>Open Google Maps Search</button>
+            <span data-google-status></span>
+          </div>
+        </div>
+        <div class="google-results wide" data-google-results></div>
+      </section>
+
       <section class="toolbar" aria-label="Lead controls">
         <label>
           Search

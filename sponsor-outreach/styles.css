@@ -180,6 +180,80 @@ main {
   margin-top: 8px;
 }
 
+.google-panel {
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(143, 63, 252, 0.3);
+  border-radius: 8px;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1fr);
+  margin-top: 18px;
+  padding: 22px;
+}
+.google-panel h2 {
+  font-size: clamp(1.7rem, 3vw, 2.8rem);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0;
+}
+.google-panel p {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 12px 0 0;
+}
+.google-form {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.google-form .wide,
+.google-results {
+  grid-column: 1 / -1;
+}
+.google-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.google-actions span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.google-results {
+  display: grid;
+  gap: 10px;
+}
+.google-result {
+  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 14px;
+}
+.google-result h3 {
+  font-size: 1rem;
+  margin: 0 0 6px;
+}
+.google-result p {
+  margin: 0;
+}
+.google-result small {
+  color: var(--muted);
+  display: block;
+  line-height: 1.45;
+}
+.google-result a {
+  color: var(--hot);
+  font-weight: 800;
+  text-decoration: none;
+}
+
 .toolbar {
   align-items: end;
   display: grid;
@@ -400,7 +474,11 @@ dialog::backdrop {
 
 @media (max-width: 1100px) {
   .workspace,
-  .hero-panel {
+  .hero-panel,
+  .google-panel {
+    grid-template-columns: 1fr;
+  }
+  .google-form {
     grid-template-columns: 1fr;
   }
   .message-panel {
