@@ -210,6 +210,25 @@ main {
 .google-results {
   grid-column: 1 / -1;
 }
+.check-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-height: 44px;
+}
+.check-row input {
+  min-height: auto;
+  width: auto;
+}
+.google-note {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 0;
+  text-transform: none;
+  letter-spacing: 0;
+}
 .google-actions {
   align-items: center;
   display: flex;
@@ -268,7 +287,10 @@ main {
 }
 .google-result a {
   color: var(--hot);
+  display: inline-flex;
   font-weight: 800;
+  margin-right: 12px;
+  margin-top: 8px;
   text-decoration: none;
 }
 

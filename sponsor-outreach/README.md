@@ -10,6 +10,8 @@ Double-click `Start Sponsor Outreach.bat` to open it, or open `index.html` in a 
 - Stores contact info, notes, amount, and follow-up date.
 - Generates email, DM, and follow-up message drafts.
 - Searches Google Places for local businesses and imports good matches as leads.
+- Filters Google results to businesses with websites, which is the best available path to finding real contact emails.
+- Adds quick Google searches to help find a business email.
 - Copies the public sponsor page link.
 - Exports and imports CSV.
 
@@ -24,6 +26,8 @@ To auto-populate local businesses, create a Google Cloud API key with **Places A
 5. Paste the key into the `Google Places API Key` field in the app.
 
 The key is saved only in your browser's local storage. Do not put API keys into GitHub.
+
+Google Places does not return business email addresses. Use the website-only filter, then click **Find Email** on a result to search for the best public contact email.
 
 If the API search is not set up yet, use **Open Google Maps Search** to manually find businesses and add them yourself.
 

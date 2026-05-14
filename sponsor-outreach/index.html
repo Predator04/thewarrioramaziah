@@ -66,11 +66,16 @@
             Add As Category
             <select data-google-category></select>
           </label>
+          <label class="check-row wide">
+            <input type="checkbox" data-google-require-website checked>
+            Only show businesses with websites
+          </label>
           <div class="google-actions wide">
             <button class="button primary" type="button" data-google-search>Search Google</button>
             <button class="button ghost" type="button" data-google-open-maps>Open Google Maps Search</button>
             <span data-google-status></span>
           </div>
+          <p class="google-note wide">Google Places does not provide business email addresses. Use website results and the Find Email shortcut to locate the best contact email.</p>
         </div>
         <div class="google-results wide" data-google-results></div>
       </section>
@@ -142,6 +147,7 @@
         <label>Contact Name<input name="contact" placeholder="Owner, manager, or DM name"></label>
         <label>Email<input name="email" type="email"></label>
         <label>Phone<input name="phone"></label>
+        <label>Website<input name="website" type="url" placeholder="https://business.com"></label>
         <label>Instagram<input name="instagram" placeholder="@business or full link"></label>
         <label>Status
           <select name="status" required></select>

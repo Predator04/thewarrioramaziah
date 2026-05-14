@@ -58,6 +58,7 @@ function normalizeLead(lead) {
     contact: lead.contact || "",
     email: lead.email || "",
     phone: lead.phone || "",
+    website: lead.website || "",
     instagram: lead.instagram || "",
     status: statuses.includes(lead.status) ? lead.status : "New",
     amount: lead.amount || "$1,500",
@@ -72,7 +73,7 @@ function filteredLeads() {
   const category = $("[data-category-filter]").value;
   const status = $("[data-status-filter]").value;
   return leads.filter((lead) => {
-    const haystack = [lead.business, lead.category, lead.contact, lead.email, lead.phone, lead.instagram, lead.notes].join(" ").toLowerCase();
+    const haystack = [lead.business, lead.category, lead.contact, lead.email, lead.phone, lead.website, lead.instagram, lead.notes].join(" ").toLowerCase();
     return (!search || haystack.includes(search)) && (!category || lead.category === category) && (!status || lead.status === status);
   });
 }
@@ -124,7 +125,7 @@ function renderCard(lead) {
   card.classList.toggle("active", lead.id === selectedId);
   card.querySelector("[data-card-category]").textContent = lead.category;
   card.querySelector("[data-card-business]").textContent = lead.business;
-  card.querySelector("[data-card-contact]").textContent = [lead.contact, lead.email || lead.instagram || lead.phone].filter(Boolean).join(" | ") || "No contact added yet";
+  card.querySelector("[data-card-contact]").textContent = [lead.contact, lead.email || lead.instagram || lead.phone || lead.website].filter(Boolean).join(" | ") || "No contact added yet";
   card.querySelector("[data-card-amount]").textContent = lead.amount || "$1,500";
   card.querySelector("[data-card-followup]").textContent = lead.followUp ? `Follow up ${lead.followUp}` : "No follow-up";
   card.querySelector("[data-edit]").addEventListener("click", () => openLeadForm(lead.id));
@@ -154,18 +155,34 @@ function moveLead(id, direction) {
 function messageFor(lead) {
   const contact = lead.contact || "there";
   const business = lead.business || "your business";
+  const hook = hookForLead(lead);
   const categoryLine = lead.category && lead.category !== "Other" ? `I thought of ${business} because local ${lead.category.toLowerCase()} businesses are a strong fit for his audience and fight-week content.` : `I thought ${business} could be a strong fit for his audience and fight-week content.`;
   const senderLine = `Send from: ${senderEmail}`;
   const optOut = `If this is not a fit, reply "no thanks" and I will not follow up again.`;
   const base = `Avishai "The Warrior" Amaziah is a 6'5" heavyweight fighting out of Las Vegas with a faith, family, and discipline story. Official fight sponsor spots are $1,500 per fight and include website placement, fight-week recognition, social media shoutouts, and content your business can repost.\n\nSponsor page: ${SPONSOR_LINK}`;
 
   if (activeTemplate === "dm") {
-    return `${senderLine}\n\nHey ${contact}, I am helping Avishai "The Warrior" Amaziah connect with a few local fight sponsors.\n\n${categoryLine}\n\n${base}\n\nWould you be open to seeing the sponsor info?\n\n${optOut}`;
+    return `${senderLine}\n\nHey ${contact}, ${hook}\n\nI am helping Avishai "The Warrior" Amaziah connect with a few local fight sponsors. ${categoryLine}\n\n${base}\n\nWould you be open to seeing the sponsor info?\n\n${optOut}`;
   }
   if (activeTemplate === "followup") {
-    return `${senderLine}\n\nHey ${contact}, just wanted to follow up on the Avishai Amaziah fight sponsor info.\n\nWe are keeping it simple: $1,500 per fight for official sponsor visibility, website placement, social shoutouts, and fight-week content the business can repost.\n\nHere is the sponsor page again: ${SPONSOR_LINK}\n\nWould you like to talk through it this week?\n\n${optOut}`;
+    return `${senderLine}\n\nHey ${contact}, quick follow-up because ${business} still feels like a natural local fit for this.\n\nWe are keeping it simple: $1,500 per fight for official sponsor visibility, website placement, social shoutouts, and fight-week content the business can repost.\n\nHere is the sponsor page again: ${SPONSOR_LINK}\n\nWould you like to talk through it this week?\n\n${optOut}`;
   }
-  return `${senderLine}\n\nSubject: Fight sponsorship opportunity with Avishai "The Warrior" Amaziah\n\nHey ${contact},\n\nI am helping Avishai "The Warrior" Amaziah build sponsor support for his next fight camp. ${categoryLine}\n\n${base}\n\nWould you be open to seeing the sponsor options or talking through whether this is a fit for ${business}?\n\n${optOut}\n\nThank you.`;
+  return `${senderLine}\n\nSubject: Quick local sponsor idea for ${business}\n\nHey ${contact},\n\n${hook}\n\nI am helping Avishai "The Warrior" Amaziah build sponsor support for his next fight camp. ${categoryLine}\n\n${base}\n\nWould you be open to seeing the sponsor options or talking through whether this is a fit for ${business}?\n\n${optOut}\n\nThank you.`;
+}
+
+function hookForLead(lead) {
+  const business = lead.business || "your business";
+  const category = lead.category || "local business";
+  const hooks = {
+    "Barbershop": `${business} already feels like the kind of neighborhood spot people trust before a big moment, and that is exactly the energy a fight sponsor should have.`,
+    "Boxing / Fitness Gym": `${business} is already connected to discipline, training, and people pushing themselves, so a heavyweight fight sponsorship actually fits the brand.`,
+    "Restaurant": `${business} has the community feel that makes fight-week support work: people remember the local places that back local athletes.`,
+    "Car Detail / Wrap": `${business} is visual, local, and built around pride in presentation, which makes it a strong fit for fight-week content people can repost.`,
+    "Tattoo Shop": `${business} already lives in the world of identity, loyalty, and personal stories, which lines up naturally with Avishai's Warrior brand.`,
+    "Recovery / Chiro": `${business} supports performance and recovery, so backing a heavyweight boxer gives that message a real athlete to stand behind.`,
+    "Church / Community": `${business} looks like the kind of community-centered partner that would connect with Avishai's faith and family story.`
+  };
+  return hooks[category] || `${business} stood out as a local ${category.toLowerCase()} that could get real visibility from backing a Las Vegas heavyweight before fight night.`;
 }
 
 function renderMessage() {
@@ -201,6 +218,7 @@ function openLeadForm(id = "") {
   form.elements.contact.value = lead.contact;
   form.elements.email.value = lead.email;
   form.elements.phone.value = lead.phone;
+  form.elements.website.value = lead.website;
   form.elements.instagram.value = lead.instagram;
   form.elements.status.value = lead.status;
   form.elements.amount.value = lead.amount;
@@ -265,6 +283,7 @@ function placeToLead(place) {
     contact: "Owner / Manager",
     email: "",
     phone: place.nationalPhoneNumber || "",
+    website,
     instagram: "",
     status: "New",
     amount: "$1,500",
@@ -330,6 +349,20 @@ function renderGoogleResults() {
       link.textContent = "View on Google Maps";
       copy.append(link);
     }
+    if (place.websiteUri) {
+      const website = document.createElement("a");
+      website.href = place.websiteUri;
+      website.target = "_blank";
+      website.rel = "noopener";
+      website.textContent = "Open Website";
+      copy.append(website);
+    }
+    const findEmail = document.createElement("a");
+    findEmail.href = emailSearchUrl(place);
+    findEmail.target = "_blank";
+    findEmail.rel = "noopener";
+    findEmail.textContent = "Find Email";
+    copy.append(findEmail);
 
     const button = document.createElement("button");
     button.className = "button secondary";
@@ -348,6 +381,7 @@ async function searchGooglePlaces() {
   const key = keyInput.value.trim();
   const query = $("[data-google-query]").value.trim();
   const location = $("[data-google-location]").value.trim() || "Las Vegas, Nevada";
+  const requireWebsite = $("[data-google-require-website]").checked;
 
   if (!key) {
     setGoogleStatus("Paste a Google Places API key first.", true);
@@ -378,12 +412,19 @@ async function searchGooglePlaces() {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || "Google Places search failed.");
-    googleResults = data.places || [];
+    googleResults = (data.places || []).filter((place) => !requireWebsite || place.websiteUri);
     renderGoogleResults();
-    setGoogleStatus(googleResults.length ? `Found ${googleResults.length} businesses.` : "No businesses found. Try a broader search.");
+    setGoogleStatus(googleResults.length ? `Found ${googleResults.length} businesses${requireWebsite ? " with websites" : ""}.` : "No businesses found. Try a broader search or turn off website-only.");
   } catch (error) {
     setGoogleStatus(error.message, true);
   }
+}
+
+function emailSearchUrl(place) {
+  const business = place.displayName?.text || "";
+  const website = place.websiteUri ? new URL(place.websiteUri).hostname.replace(/^www\./, "") : "";
+  const query = [business, website, "email OR contact"].filter(Boolean).join(" ");
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
 function openGoogleMapsSearch() {
@@ -398,7 +439,7 @@ function csvEscape(value) {
 }
 
 function exportCsv() {
-  const headers = ["business", "category", "contact", "email", "phone", "instagram", "status", "amount", "followUp", "lastContacted", "notes"];
+  const headers = ["business", "category", "contact", "email", "phone", "website", "instagram", "status", "amount", "followUp", "lastContacted", "notes"];
   const rows = leads.map((lead) => headers.map((key) => csvEscape(lead[key])).join(","));
   const blob = new Blob([[headers.join(","), ...rows].join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
