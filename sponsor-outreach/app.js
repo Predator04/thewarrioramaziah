@@ -25,6 +25,20 @@ const starterLeads = [
   { business: "Local Restaurant", category: "Restaurant", contact: "Owner", email: "", phone: "", instagram: "", status: "New", amount: "$1,500", followUp: "", notes: "Ask about supporting a local Las Vegas heavyweight." }
 ];
 
+const autoSearches = [
+  { query: "barbershop", category: "Barbershop" },
+  { query: "boxing gym", category: "Boxing / Fitness Gym" },
+  { query: "fitness gym", category: "Boxing / Fitness Gym" },
+  { query: "restaurant", category: "Restaurant" },
+  { query: "tattoo shop", category: "Tattoo Shop" },
+  { query: "car detail", category: "Car Detail / Wrap" },
+  { query: "vehicle wrap", category: "Car Detail / Wrap" },
+  { query: "chiropractor", category: "Recovery / Chiro" },
+  { query: "physical therapy", category: "Recovery / Chiro" },
+  { query: "clothing brand", category: "Clothing Brand" },
+  { query: "church", category: "Church / Community" }
+];
+
 let leads = [];
 let selectedId = "";
 let activeTemplate = "email";
@@ -88,12 +102,14 @@ function renderStats() {
   const interested = leads.filter((lead) => lead.status === "Interested" || lead.status === "Follow Up").length;
   const closed = leads.filter((lead) => lead.status === "Closed");
   const due = leads.filter((lead) => lead.followUp && new Date(`${lead.followUp}T23:59:59`) < new Date() && lead.status !== "Closed").length;
+  const needsEmail = leads.filter((lead) => !lead.email && lead.website && lead.status !== "Closed").length;
   const stats = [
     ["Total Leads", leads.length],
     ["Contacted", contacted],
     ["Interested", interested],
     ["Closed Value", `$${moneyTotal(closed).toLocaleString()}`],
-    ["Follow-ups Due", due]
+    ["Follow-ups Due", due],
+    ["Needs Email", needsEmail]
   ];
   root.innerHTML = stats.map(([label, value]) => `<div class="stat-card"><span>${label}</span><strong>${value}</strong></div>`).join("");
 }
@@ -263,13 +279,13 @@ function setGoogleStatus(message, isError = false) {
   status.style.color = isError ? "var(--danger)" : "var(--muted)";
 }
 
-function placeToLead(place) {
+function placeToLead(place, categoryOverride = "") {
   const name = place.displayName?.text || "";
   const mapsUrl = place.googleMapsUri || "";
   const website = place.websiteUri || "";
   const rating = place.rating ? `${place.rating} stars` : "";
   const reviews = place.userRatingCount ? `${place.userRatingCount} reviews` : "";
-  const category = $("[data-google-category]").value || "Other";
+  const category = categoryOverride || $("[data-google-category]").value || "Other";
   const details = [
     place.formattedAddress,
     website ? `Website: ${website}` : "",
@@ -288,7 +304,7 @@ function placeToLead(place) {
     status: "New",
     amount: "$1,500",
     followUp: "",
-    notes: `Found through Google Places. ${details.join(" | ")}`
+    notes: `Found through Google Places. Needs email before sending outreach. ${details.join(" | ")}`
   });
 }
 
@@ -376,6 +392,24 @@ function renderGoogleResults() {
   });
 }
 
+async function fetchGooglePlaces({ key, query, location, maxResultCount = 12 }) {
+  const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-goog-api-key": key,
+      "x-goog-fieldmask": "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri,places.rating,places.userRatingCount,places.types"
+    },
+    body: JSON.stringify({
+      textQuery: `${query} in ${location}`,
+      maxResultCount
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error?.message || "Google Places search failed.");
+  return data.places || [];
+}
+
 async function searchGooglePlaces() {
   const keyInput = $("[data-google-key]");
   const key = keyInput.value.trim();
@@ -398,25 +432,62 @@ async function searchGooglePlaces() {
   renderGoogleResults();
 
   try {
-    const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-goog-api-key": key,
-        "x-goog-fieldmask": "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri,places.rating,places.userRatingCount,places.types"
-      },
-      body: JSON.stringify({
-        textQuery: `${query} in ${location}`,
-        maxResultCount: 12
-      })
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "Google Places search failed.");
-    googleResults = (data.places || []).filter((place) => !requireWebsite || place.websiteUri);
+    const places = await fetchGooglePlaces({ key, query, location });
+    googleResults = places.filter((place) => !requireWebsite || place.websiteUri);
     renderGoogleResults();
     setGoogleStatus(googleResults.length ? `Found ${googleResults.length} businesses${requireWebsite ? " with websites" : ""}.` : "No businesses found. Try a broader search or turn off website-only.");
   } catch (error) {
     setGoogleStatus(error.message, true);
+  }
+}
+
+async function runAutoSearch() {
+  const keyInput = $("[data-google-key]");
+  const key = keyInput.value.trim();
+  const location = $("[data-google-location]").value.trim() || "Las Vegas, Nevada";
+  const button = $("[data-google-auto-search]");
+  const maxPerSearch = 3;
+  let added = 0;
+  const reviewed = [];
+
+  if (!key) {
+    setGoogleStatus("Paste a Google Places API key first.", true);
+    return;
+  }
+
+  localStorage.setItem(GOOGLE_KEY_STORAGE, key);
+  googleResults = [];
+  renderGoogleResults();
+  button.disabled = true;
+
+  try {
+    for (const [index, item] of autoSearches.entries()) {
+      setGoogleStatus(`Auto search ${index + 1}/${autoSearches.length}: ${item.query}...`);
+      const places = await fetchGooglePlaces({ key, query: item.query, location, maxResultCount: 10 });
+      const usefulPlaces = places.filter((place) => place.websiteUri);
+      reviewed.push(...usefulPlaces);
+
+      let addedForSearch = 0;
+      for (const place of usefulPlaces) {
+        if (addedForSearch >= maxPerSearch) break;
+        const lead = placeToLead(place, item.category);
+        if (isDuplicateLead(lead)) continue;
+        leads.unshift(lead);
+        selectedId = selectedId || lead.id;
+        added += 1;
+        addedForSearch += 1;
+      }
+    }
+
+    googleResults = reviewed;
+    saveLeads();
+    render();
+    renderGoogleResults();
+    setGoogleStatus(added ? `Auto-added ${added} website leads. Check Needs Email, then use Find Email before sending.` : "No new website leads found. Try another area or broader category.");
+  } catch (error) {
+    setGoogleStatus(error.message, true);
+  } finally {
+    button.disabled = false;
   }
 }
 
@@ -520,6 +591,7 @@ function bindEvents() {
     localStorage.setItem(GOOGLE_KEY_STORAGE, event.target.value.trim());
   });
   $("[data-google-search]").addEventListener("click", searchGooglePlaces);
+  $("[data-google-auto-search]").addEventListener("click", runAutoSearch);
   $("[data-google-open-maps]").addEventListener("click", openGoogleMapsSearch);
   $("[data-copy-message]").addEventListener("click", () => copyText($("[data-message]").value));
   $("[data-sender]").addEventListener("change", (event) => {
